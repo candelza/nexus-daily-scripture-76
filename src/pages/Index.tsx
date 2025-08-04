@@ -196,6 +196,46 @@ const Index = () => {
           </CardContent>
         </Card>
         
+        {/* Calendar UI */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              ปฏิทินการอ่านพระคัมภีร์ประจำปี (เดือนนี้)
+            </CardTitle>
+            <CardDescription>เลือกวันที่เพื่อดูข้อพระคัมภีร์ประจำวันนั้น</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-7 gap-2">
+              {[...Array(31)].map((_, i) => {
+                const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), i + 1);
+                const dayNames = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
+                const dayName = dayNames[date.getDay()];
+                const isSelected = date.getDate() === currentDate.getDate();
+                const readingId = `ot-${date.toISOString().split('T')[0]}`;
+                return (
+                  <button
+                    key={i}
+                    className={`flex flex-col items-center justify-center p-2 rounded-lg border transition-all duration-150 text-xs
+                      ${isSelected ? 'bg-primary text-white border-primary' : 'bg-muted text-foreground border-muted'}
+                      hover:bg-primary/10`}
+                    onClick={() => setCurrentDate(date)}
+                  >
+                    <span className="font-bold">{i + 1}</span>
+                    <span className="text-[10px] text-muted-foreground">{dayName}</span>
+                    <span className="mt-1">
+                      {isRead(readingId)
+                        ? <span title="อ่านแล้ว">✅</span>
+                        : <span title="ยังไม่ได้อ่าน">⭕</span>
+                      }
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="space-y-6">
           <h2 className="text-2xl font-semibold text-foreground">ข้อพระคัมภีร์ประจำปี</h2>
           {readings.map((reading) => (
