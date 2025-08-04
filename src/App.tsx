@@ -8,6 +8,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import RandomVerses from "./pages/RandomVerses";
 import BibleClassRegistration from "./pages/BibleClassRegistration";
+import ManageCareGroup from "./pages/ManageCareGroup";
 import NotFound from "./pages/NotFound";
 import Members from "./pages/Members";
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/random" element={<RandomVerses />} />
           <Route path="/bible-class" element={<BibleClassRegistration />} />
+          <Route path="/care-group/:id/manage" element={<ManageCareGroup />} />
           <Route path="/members" element={<Members />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

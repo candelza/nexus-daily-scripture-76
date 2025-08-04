@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { ScriptureCard } from '@/components/ScriptureCard';
 import { ProgressTracker } from '@/components/ProgressTracker';
+import { BibleVerseSearch } from '@/components/BibleVerseSearch';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { getTodayReading, BibleReading } from '@/data/bibleReadings';
@@ -13,6 +14,8 @@ const Index = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [todayReading, setTodayReading] = useState<BibleReading | null>(null);
   const [loading, setLoading] = useState(true);
+  const [searchResults, setSearchResults] = useState<BibleReading | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
   const { currentStreak, totalReadThisMonth, yearProgress, markAsRead, isRead } = useReadingProgress();
   const navigate = useNavigate();
   
@@ -46,6 +49,51 @@ const Index = () => {
     );
   }
 
+  const handleSearch = async (query: string) => {
+    if (!query) {
+      setSearchResults(null);
+      return;
+    }
+    
+    setIsSearching(true);
+    try {
+      // In a real app, you would call your API to search for verses
+      // const results = await searchBibleVerses(query);
+      // setSearchResults(results);
+      
+      // For demo purposes, we'll just show a loading state
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+          // Mock search results with a unique ID
+      setSearchResults({
+        id: `search-${Date.now()}`,
+        date: new Date().toISOString().split('T')[0],
+        oldTestament: {
+          book: 'สดุดี',
+          chapter: '119',
+          verses: '105',
+          text: 'พระวจนะของพระองค์เป็นโคมสำหรับเท้าของข้าพระองค์ และเป็นความสว่างแก่ทางของข้าพระองค์',
+        },
+        newTestament: {
+          book: 'มัทธิว',
+          chapter: '7',
+          verses: '7-8',
+          text: 'จงขอแล้วจะได้ จงหาแล้วจะพบ จงเคาะแล้วจะเปิดให้แก่ท่าน เพราะว่าทุกคนที่ขอก็ได้รับ ทุกคนที่แสวงหาก็พบ และทุกคนที่เคาะก็จะเปิดให้',
+        },
+        psalm: {
+          book: 'สุภาษิต',
+          chapter: '3',
+          verses: '5-6',
+          text: 'จงวางใจในพระยาห์เวห์ด้วยสุดใจของท่าน และอย่าพึ่งพาความรอบรู้ของตนเอง จงยอมรับรู้พระองค์ในทุกทางของท่าน และพระองค์จะทรงกระทำให้วิถีของท่านราบรื่น',
+        },
+      });
+    } catch (error) {
+      console.error('Error searching verses:', error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   if (!todayReading) {
     return (
       <div className="min-h-screen bg-background">
@@ -59,37 +107,55 @@ const Index = () => {
     );
   }
 
+  // Get readings to display (search results or today's readings)
+  const displayReadings = searchResults || todayReading;
+  
+  if (!displayReadings) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header currentDate={currentDate} onDateChange={setCurrentDate}>
+          <BibleVerseSearch onSearch={handleSearch} isLoading={isSearching} />
+        </Header>
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <p className="text-center text-muted-foreground">ไม่พบข้อพระคัมภีร์</p>
+        </div>
+      </div>
+    );
+  }
+
   // Convert BibleReading to format expected by ScriptureCard
   const readings = [
     {
-      id: `ot-${todayReading.date}`,
-      book: todayReading.oldTestament.book,
-      chapter: parseInt(todayReading.oldTestament.chapter),
-      verses: todayReading.oldTestament.verses,
-      text: todayReading.oldTestament.text,
-      theme: "พระคัมภีร์เดิม"
+      id: `ot-${displayReadings.date}`,
+      book: displayReadings.oldTestament.book,
+      chapter: parseInt(displayReadings.oldTestament.chapter),
+      verses: displayReadings.oldTestament.verses,
+      text: displayReadings.oldTestament.text,
+      theme: searchResults ? 'ผลการค้นหา' : 'พระคัมภีร์เดิม'
     },
     {
-      id: `nt-${todayReading.date}`,
-      book: todayReading.newTestament.book,
-      chapter: parseInt(todayReading.newTestament.chapter),
-      verses: todayReading.newTestament.verses,
-      text: todayReading.newTestament.text,
-      theme: "พระคัมภีร์ใหม่"
+      id: `nt-${displayReadings.date}`,
+      book: displayReadings.newTestament.book,
+      chapter: parseInt(displayReadings.newTestament.chapter),
+      verses: displayReadings.newTestament.verses,
+      text: displayReadings.newTestament.text,
+      theme: searchResults ? '' : 'พระคัมภีร์ใหม่'
     },
     {
-      id: `psalm-${todayReading.date}`,
-      book: todayReading.psalm.book,
-      chapter: parseInt(todayReading.psalm.chapter),
-      verses: todayReading.psalm.verses,
-      text: todayReading.psalm.text,
-      theme: "สดุดี"
+      id: `psalm-${displayReadings.date}`,
+      book: displayReadings.psalm.book,
+      chapter: parseInt(displayReadings.psalm.chapter),
+      verses: displayReadings.psalm.verses,
+      text: displayReadings.psalm.text,
+      theme: searchResults ? '' : 'สดุดี'
     }
   ];
 
   return (
     <div className="min-h-screen bg-background">
-      <Header currentDate={currentDate} onDateChange={setCurrentDate} />
+      <Header currentDate={currentDate} onDateChange={setCurrentDate}>
+        <BibleVerseSearch onSearch={handleSearch} isLoading={isSearching} />
+      </Header>
       
       <main className="max-w-4xl mx-auto px-4 py-8 space-y-8">
         <ProgressTracker

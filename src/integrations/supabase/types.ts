@@ -66,7 +66,14 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey"
+            columns: ["id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reading_progress: {
         Row: {
@@ -75,6 +82,7 @@ export type Database = {
           id: string
           is_completed: boolean
           reading_id: string
+          updated_at: string
           user_id: string
         }
         Insert: {
@@ -83,6 +91,7 @@ export type Database = {
           id?: string
           is_completed?: boolean
           reading_id: string
+          updated_at?: string
           user_id: string
         }
         Update: {
@@ -91,9 +100,146 @@ export type Database = {
           id?: string
           is_completed?: boolean
           reading_id?: string
+          updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "reading_progress_reading_id_fkey"
+            columns: ["reading_id"]
+            referencedRelation: "daily_readings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reading_progress_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prayer_notes: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          content: string
+          date: string
+          is_private: boolean
+          care_group_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          content: string
+          date: string
+          is_private?: boolean
+          care_group_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          content?: string
+          date?: string
+          is_private?: boolean
+          care_group_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prayer_notes_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prayer_notes_care_group_id_fkey"
+            columns: ["care_group_id"]
+            referencedRelation: "care_groups"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      care_groups: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          image_url: string | null
+          created_by: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          image_url?: string | null
+          created_by: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          image_url?: string | null
+          created_by?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "care_groups_created_by_fkey"
+            columns: ["created_by"]
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      user_care_groups: {
+        Row: {
+          id: string
+          user_id: string
+          care_group_id: string
+          role: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          care_group_id: string
+          role?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          care_group_id?: string
+          role?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_care_groups_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_care_groups_care_group_id_fkey"
+            columns: ["care_group_id"]
+            referencedRelation: "care_groups"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {
