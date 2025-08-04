@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { ScriptureCard } from '@/components/ScriptureCard';
-import { ProgressTracker } from '@/components/ProgressTracker';
 import { BibleVerseSearch } from '@/components/BibleVerseSearch';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { getTodayReading, BibleReading } from '@/data/bibleReadings';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
-import { Shuffle, Calendar, BookOpen, GraduationCap, Play, BookHeart } from 'lucide-react';
+import { Shuffle, Calendar, BookOpen, GraduationCap, Play, BookHeart, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
@@ -158,12 +157,7 @@ const Index = () => {
       </Header>
       
       <main className="max-w-4xl mx-auto px-4 py-8 space-y-8">
-        <ProgressTracker
-          currentStreak={currentStreak}
-          totalRead={totalReadThisMonth}
-          monthlyGoal={30}
-          yearProgress={yearProgress}
-        />
+
 
         {/* YouTube Section */}
         <Card className="overflow-hidden">
@@ -258,6 +252,18 @@ const Index = () => {
                 </div>
               </Button>
               <Button 
+                onClick={() => navigate('/profile')}
+                variant="outline"
+                className="h-16 gap-3"
+                size="lg"
+              >
+                <User className="w-5 h-5" />
+                <div className="text-left">
+                  <div className="font-semibold">ข้อมูลส่วนตัว</div>
+                  <div className="text-sm opacity-80">แก้ไขโปรไฟล์</div>
+                </div>
+              </Button>
+              <Button 
                 onClick={() => navigate('/dashboard')}
                 variant="outline"
                 className="h-16 gap-3"
@@ -268,6 +274,18 @@ const Index = () => {
                   <div className="font-semibold">Dashboard</div>
                   <div className="text-sm opacity-80">ดูสถิติการอ่าน</div>
                 </div>
+              </Button>
+              <Button 
+                 onClick={() => navigate('/profile')}
+                 variant="outline"
+                 className="h-16 gap-3"
+                 size="lg"
+              >
+                 <User className="w-5 h-5" />
+                 <div className="text-left">
+                   <div className="font-semibold">ข้อมูลส่วนตัว</div>
+                   <div className="text-sm opacity-80">แก้ไขโปรไฟล์</div>
+                 </div>
               </Button>
             </div>
           </CardContent>

@@ -6,7 +6,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { Users, BookHeart, Edit, Save } from 'lucide-react';
+import { ProgressTracker } from '@/components/ProgressTracker';
+import { useReadingProgress } from '@/hooks/useReadingProgress';
+import Profile from './Profile';
+import { Users, BookHeart, Edit, Save, User } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -21,6 +24,7 @@ interface Profile {
 }
 
 const Dashboard = () => {
+  const { currentStreak, totalReadThisMonth, yearProgress } = useReadingProgress();
   const { user, signOut, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -169,6 +173,15 @@ const Dashboard = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        {/* Progress Tracker Section */}
+        <div className="mb-6">
+          <ProgressTracker
+            currentStreak={currentStreak}
+            totalRead={totalReadThisMonth}
+            monthlyGoal={30}
+            yearProgress={yearProgress}
+          />
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <Card className="md:col-span-1">
             <CardHeader>
@@ -188,7 +201,7 @@ const Dashboard = () => {
           </Card>
           <div className="md:col-span-2">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-              <TabsList className="grid w-full grid-cols-2 max-w-md">
+              <TabsList className="grid w-full grid-cols-3 max-w-md">
                 <TabsTrigger value="prayer" className="flex items-center gap-2">
                   <BookHeart className="w-4 h-4" />
                   บันทึกคำอธิษฐาน
@@ -197,12 +210,19 @@ const Dashboard = () => {
                   <Users className="w-4 h-4" />
                   กลุ่มแคร์
                 </TabsTrigger>
+                <TabsTrigger value="profile" className="flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  ข้อมูลส่วนตัว
+                </TabsTrigger>
               </TabsList>
               <TabsContent value="prayer">
                 {user && <PrayerNotes user={user} />}
               </TabsContent>
               <TabsContent value="care-group">
                 {user && <CareGroupManager user={user} />}
+              </TabsContent>
+              <TabsContent value="profile">
+                <Profile />
               </TabsContent>
             </Tabs>
           </div>
