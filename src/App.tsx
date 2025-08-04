@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import RandomVerses from "./pages/RandomVerses";
 import BibleClassRegistration from "./pages/BibleClassRegistration";
 import NotFound from "./pages/NotFound";
+import Members from "./pages/Members";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/random" element={<RandomVerses />} />
           <Route path="/bible-class" element={<BibleClassRegistration />} />
+          <Route path="/members" element={<Members />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
