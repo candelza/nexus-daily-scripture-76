@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { getTodayReading, BibleReading } from '@/data/bibleReadings';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
-import { Shuffle, Calendar, BookOpen, GraduationCap, Play } from 'lucide-react';
+import { Shuffle, Calendar, BookOpen, GraduationCap, Play, BookHeart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
@@ -223,6 +223,17 @@ const Index = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <Button 
+                onClick={() => navigate('/prayer/new')}
+                className="h-16 gap-3"
+                size="lg"
+              >
+                <BookHeart className="w-5 h-5" />
+                <div className="text-left">
+                  <div className="font-semibold">เขียนคำอธิษฐาน</div>
+                  <div className="text-sm opacity-80">สร้างบันทึกคำอธิษฐานใหม่</div>
+                </div>
+              </Button>
               <Button 
                 onClick={() => navigate('/random')}
                 className="h-16 gap-3"
