@@ -1,0 +1,60 @@
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { BookOpen, Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+interface ScriptureReading {
+  id: string;
+  book: string;
+  chapter: number;
+  verses: string;
+  text: string;
+  theme?: string;
+}
+
+interface ScriptureCardProps {
+  reading: ScriptureReading;
+  isRead: boolean;
+  onMarkAsRead: (id: string) => void;
+}
+
+export const ScriptureCard = ({ reading, isRead, onMarkAsRead }: ScriptureCardProps) => {
+  return (
+    <Card className="p-6 transition-all duration-200 hover:shadow-lg">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className={`p-2 rounded-lg ${isRead ? 'bg-progress/20' : 'bg-accent/20'}`}>
+            <BookOpen className={`w-5 h-5 ${isRead ? 'text-progress' : 'text-accent-foreground'}`} />
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg text-foreground">
+              {reading.book} {reading.chapter}:{reading.verses}
+            </h3>
+            {reading.theme && (
+              <Badge variant="secondary" className="mt-1">
+                {reading.theme}
+              </Badge>
+            )}
+          </div>
+        </div>
+        <Button
+          variant={isRead ? "default" : "outline"}
+          size="sm"
+          onClick={() => onMarkAsRead(reading.id)}
+          className="gap-2"
+        >
+          <Heart className={`w-4 h-4 ${isRead ? 'fill-current' : ''}`} />
+          {isRead ? 'อ่านแล้ว' : 'ทำเครื่องหมาย'}
+        </Button>
+      </div>
+      
+      <div className="prose prose-lg max-w-none">
+        <blockquote className="border-l-4 border-scripture pl-6 py-4 bg-scripture/5 rounded-r-lg">
+          <p className="text-foreground leading-relaxed text-lg italic">
+            "{reading.text}"
+          </p>
+        </blockquote>
+      </div>
+    </Card>
+  );
+};
