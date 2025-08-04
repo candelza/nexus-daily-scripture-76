@@ -8,7 +8,7 @@ import { format, parseISO } from 'date-fns';
 import { th } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
-import { useAuth } from '@/hooks/useAuth';
+
 import {
   Select,
   SelectContent,
@@ -23,7 +23,13 @@ type PrayerNote = Database['public']['Tables']['prayer_notes']['Row'] & {
 
 type CareGroup = Database['public']['Tables']['care_groups']['Row'];
 
-export function PrayerNotes() {
+import { User } from '@supabase/supabase-js';
+
+interface PrayerNotesProps {
+  user: User;
+}
+
+export const PrayerNotes: React.FC<PrayerNotesProps> = ({ user }) => {
   const [notes, setNotes] = useState<PrayerNote[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'));
   const [editingNote, setEditingNote] = useState<Partial<PrayerNote> | null>(null);
@@ -44,10 +50,9 @@ export function PrayerNotes() {
   }, [selectedDate]);
 
   const fetchPrayerNotes = async () => {
+    if (!user) return;
     try {
       setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('ไม่พบผู้ใช้');
 
       // Get notes for the selected date
       const { data, error } = await supabase
@@ -78,9 +83,8 @@ export function PrayerNotes() {
   };
 
   const fetchCareGroups = async () => {
+    if (!user) return;
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
 
       const { data, error } = await supabase
         .from('user_care_groups')
@@ -107,10 +111,10 @@ export function PrayerNotes() {
       return;
     }
 
+    if (!user) return;
+
     try {
       setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('ไม่พบผู้ใช้');
 
       if (editingNote.id) {
         // Update existing note

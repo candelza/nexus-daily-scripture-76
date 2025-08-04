@@ -8,7 +8,13 @@ import { ImagePlus, Users, Edit, Trash2, Plus, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 
-export function CareGroupManager() {
+import { User } from '@supabase/supabase-js';
+
+interface CareGroupManagerProps {
+  user: User;
+}
+
+export const CareGroupManager: React.FC<CareGroupManagerProps> = ({ user }) => {
   const [careGroups, setCareGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
@@ -27,8 +33,8 @@ export function CareGroupManager() {
 
   const fetchCareGroups = async () => {
     try {
+      if (!user) return;
       setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
       
       const { data, error } = await supabase
         .from('user_care_groups')
@@ -77,9 +83,8 @@ export function CareGroupManager() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!user) return;
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('ไม่พบผู้ใช้');
 
       let imageUrl = '';
       
