@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { getTodayReading, BibleReading } from '@/data/bibleReadings';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { Shuffle, Calendar, BookOpen, GraduationCap, BookHeart, User } from 'lucide-react';
+import { LanguageToggle } from '@/components/LanguageToggle';
 import { useNavigate } from 'react-router-dom';
 
 const Index = () => {

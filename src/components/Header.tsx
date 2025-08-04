@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import { LanguageToggle } from "@/components/LanguageToggle";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface HeaderProps {
   currentDate: Date;
@@ -21,8 +23,11 @@ export const Header = ({ currentDate, onDateChange, children }: HeaderProps) => 
     onDateChange(new Date());
   };
 
+  const { lang } = useLanguage();
+
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('th-TH', {
+    const locale = lang === 'en' ? 'en-US' : 'th-TH';
+    return date.toLocaleDateString(locale, {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -44,6 +49,7 @@ export const Header = ({ currentDate, onDateChange, children }: HeaderProps) => 
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <LanguageToggle />
             <Button variant="outline" onClick={goToToday} className="gap-2">
               <Calendar className="w-4 h-4" />
               วันนี้
