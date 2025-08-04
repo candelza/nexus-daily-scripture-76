@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { getTodayReading, BibleReading } from '@/data/bibleReadings';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
-import { Shuffle, Calendar, BookOpen, GraduationCap, Play, BookHeart, User } from 'lucide-react';
+import { Shuffle, Calendar, BookOpen, GraduationCap, BookHeart, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
@@ -159,53 +159,6 @@ const Index = () => {
       <main className="max-w-4xl mx-auto px-4 py-8 space-y-8">
 
 
-        {/* YouTube Section */}
-        <Card className="overflow-hidden">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Play className="w-5 h-5 text-red-500" />
-              NexusBangkok Church - วิดีโอล่าสุด
-            </CardTitle>
-            <CardDescription>
-              ติดตามข่าวสารและคำเทศนาล่าสุดจาก NexusBangkok Church
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="aspect-video w-full">
-              <iframe
-                className="w-full h-full rounded-lg"
-                src="https://www.youtube.com/embed/?listType=user_uploads&list=nexusfellowship&index=1"
-                title="NexusBangkok Church - วิดีโอล่าสุด"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
-            </div>
-            <div className="mt-4 text-center space-y-3">
-              <p className="text-sm text-muted-foreground">
-                ติดตามคำเทศนาและข่าวสารล่าสุดจาก NexusBangkok Church
-              </p>
-              <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                <Button 
-                  variant="outline" 
-                  onClick={() => window.open('https://www.youtube.com/@nexusfellowship', '_blank')}
-                  className="gap-2"
-                >
-                  <Play className="w-4 h-4" />
-                  ดูช่อง YouTube ทั้งหมด
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => window.open('https://www.youtube.com/@nexusfellowship/videos', '_blank')}
-                  className="gap-2"
-                >
-                  <Play className="w-4 h-4" />
-                  วิดีโอทั้งหมด
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Quick Actions */}
         <Card>
