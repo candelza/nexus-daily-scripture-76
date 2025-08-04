@@ -44,8 +44,8 @@ export const Header = ({ currentDate, onDateChange }: HeaderProps) => {
             <div className="p-2 bg-accent rounded-lg">
               <Church className="w-6 h-6 text-accent-foreground" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">พระคัมภีร์ประจำวัน</h1>
+            <div className="flex items-center gap-4">
+              <h1 className="text-2xl font-bold text-foreground">พระคัมภีร์ประจำปี</h1>
               <p className="text-sm text-muted-foreground">Nexus Church Bangkok</p>
             </div>
           </div>

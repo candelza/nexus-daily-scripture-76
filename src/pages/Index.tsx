@@ -197,7 +197,7 @@ const Index = () => {
         </Card>
         
         <div className="space-y-6">
-          <h2 className="text-2xl font-semibold text-foreground">ข้อพระคัมภีร์ประจำวัน</h2>
+          <h2 className="text-2xl font-semibold text-foreground">ข้อพระคัมภีร์ประจำปี</h2>
           {readings.map((reading) => (
             <ScriptureCard
               key={reading.id}

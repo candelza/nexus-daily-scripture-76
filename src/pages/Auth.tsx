@@ -101,7 +101,7 @@ const Auth = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">อ่านพระคัมภีร์ประจำวัน</CardTitle>
+          <CardTitle className="text-2xl font-bold">อ่านพระคัมภีร์ประจำปี</CardTitle>
           <CardDescription>เข้าสู่ระบบเพื่อบันทึกความคืบหน้าการอ่าน</CardDescription>
         </CardHeader>
         <CardContent>
