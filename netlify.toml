@@ -28,6 +28,8 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Environment variables for build (you'll need to set these in Netlify dashboard)
-# VITE_SUPABASE_URL = "https://sijdfgnypaplxihifwgi.supabase.co"
-# VITE_SUPABASE_ANON_KEY = "your-anon-key-here"
+# Environment variables for ReadBible project
+# Set these in Netlify dashboard under Site settings > Environment variables
+[build.environment]
+  VITE_SUPABASE_URL = "https://sijdfgnypaplxihifwgi.supabase.co"
+  VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpamRmZ255cGFwbHhpaGlmd2dpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMzYwODAsImV4cCI6MjA2OTgxMjA4MH0.RBEmlyAtd0qCNABXMwbgeeSASnEx7S2SsnHduYDtnUg"
