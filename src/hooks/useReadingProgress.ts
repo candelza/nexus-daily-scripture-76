@@ -16,20 +16,32 @@ export const useReadingProgress = () => {
     yearProgress: 0
   });
   const [readReadings, setReadReadings] = useState<Set<string>>(new Set());
+  const [isLoading, setIsLoading] = useState(true);
 
   // Load progress from Supabase when user changes
   useEffect(() => {
-    if (user) {
-      loadProgressFromSupabase();
-    } else {
-      // Reset state when user logs out
-      setProgress({
-        currentStreak: 0,
-        totalReadThisMonth: 0,
-        yearProgress: 0
-      });
-      setReadReadings(new Set());
-    }
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        if (user) {
+          await loadProgressFromSupabase();
+        } else {
+          // Reset state when user logs out
+          setProgress({
+            currentStreak: 0,
+            totalReadThisMonth: 0,
+            yearProgress: 0
+          });
+          setReadReadings(new Set());
+        }
+      } catch (error) {
+        console.error('Error loading reading progress:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadData();
   }, [user]);
 
   const loadProgressFromSupabase = async () => {
@@ -69,7 +81,7 @@ export const useReadingProgress = () => {
       const yearProgressPercent = Math.min(100, Math.round((completedReadings.length / dayOfYear) * 100));
 
       setProgress({
-        currentStreak: completedReadings.length, // Simplified streak calculation
+        currentStreak: completedReadings.length, 
         totalReadThisMonth: thisMonthReadings.length,
         yearProgress: yearProgressPercent
       });
@@ -148,11 +160,17 @@ export const useReadingProgress = () => {
     }
   };
 
-  const isRead = (readingId: string) => readReadings.has(readingId);
+  const isRead = (readingId: string) => {
+    if (isLoading) return false; 
+    return readReadings.has(readingId);
+  };
 
   return {
-    ...progress,
+    currentStreak: progress.currentStreak,
+    totalReadThisMonth: progress.totalReadThisMonth,
+    yearProgress: progress.yearProgress,
     markAsRead,
-    isRead
+    isRead,
+    isLoading
   };
 };

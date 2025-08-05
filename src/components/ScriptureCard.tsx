@@ -1,7 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Heart } from "lucide-react";
+import { BookOpen, Heart, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ScriptureReading {
   id: string;
@@ -16,9 +17,32 @@ interface ScriptureCardProps {
   reading: ScriptureReading;
   isRead: boolean;
   onMarkAsRead: (id: string) => void;
+  isLoading?: boolean;
 }
 
-export const ScriptureCard = ({ reading, isRead, onMarkAsRead }: ScriptureCardProps) => {
+export const ScriptureCard = ({ 
+  reading, 
+  isRead, 
+  onMarkAsRead, 
+  isLoading = false 
+}: ScriptureCardProps) => {
+  if (isLoading) {
+    return (
+      <Card className="p-6">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-3 w-full">
+            <Skeleton className="h-10 w-10 rounded-lg" />
+            <div className="space-y-2 flex-1">
+              <Skeleton className="h-5 w-40" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+          </div>
+          <Skeleton className="h-9 w-24" />
+        </div>
+        <Skeleton className="h-16 w-full" />
+      </Card>
+    );
+  }
   return (
     <Card className="p-6 transition-all duration-200 hover:shadow-lg">
       <div className="flex items-start justify-between mb-4">

@@ -1,20 +1,31 @@
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, Target, Calendar } from "lucide-react";
+import { Trophy, Target, Calendar, Loader2 } from "lucide-react";
 
 interface ProgressTrackerProps {
   currentStreak: number;
   totalRead: number;
   monthlyGoal: number;
   yearProgress: number;
+  isLoading?: boolean;
 }
 
 export const ProgressTracker = ({ 
   currentStreak, 
   totalRead, 
   monthlyGoal, 
-  yearProgress 
+  yearProgress,
+  isLoading = false
 }: ProgressTrackerProps) => {
+  if (isLoading) {
+    return (
+      <Card className="p-6">
+        <div className="flex justify-center items-center h-40">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </Card>
+    );
+  }
   return (
     <Card className="p-6">
       <h3 className="text-xl font-semibold mb-6 text-foreground flex items-center gap-2">

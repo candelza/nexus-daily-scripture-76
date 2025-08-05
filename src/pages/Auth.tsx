@@ -1,19 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { FcGoogle } from 'react-icons/fc';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { FcGoogle } from 'react-icons/fc';
+import { useToast } from '@/components/ui/use-toast';
+import { Loader2 } from 'lucide-react';
+
+type AuthError = {
+  message: string;
+};
 
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState({
+    google: false,
+    emailSignIn: false,
+    emailSignUp: false,
+  });
+  
   const { user, signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -27,73 +36,72 @@ const Auth = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      setLoading(true);
+      setIsLoading(prev => ({ ...prev, google: true }));
       await signInWithGoogle();
-    } catch (error: any) {
+      // No need to handle success here as the auth state change will trigger a redirect
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'ไม่สามารถเข้าสู่ระบบด้วย Google ได้';
       toast({
-        variant: "destructive",
-        title: "เกิดข้อผิดพลาด",
-        description: error.message || "ไม่สามารถเข้าสู่ระบบด้วย Google ได้"
+        variant: 'destructive',
+        title: 'เกิดข้อผิดพลาด',
+        description: errorMessage,
       });
     } finally {
-      setLoading(false);
+      setIsLoading(prev => ({ ...prev, google: false }));
     }
   };
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      setLoading(true);
+      setIsLoading(prev => ({ ...prev, emailSignIn: true }));
       const { error } = await signInWithEmail(email, password);
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "เกิดข้อผิดพลาด",
-          description: error.message || "ไม่สามารถเข้าสู่ระบบได้"
-        });
-      } else {
-        toast({
-          title: "เข้าสู่ระบบสำเร็จ",
-          description: "ยินดีต้อนรับกลับ!"
-        });
-        navigate('/');
-      }
-    } catch (error: any) {
+      
+      if (error) throw error;
+      
       toast({
-        variant: "destructive",
-        title: "เกิดข้อผิดพลาด",
-        description: error.message || "ไม่สามารถเข้าสู่ระบบได้"
+        title: 'เข้าสู่ระบบสำเร็จ',
+        description: 'ยินดีต้อนรับกลับ!',
+      });
+      navigate('/');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'ไม่สามารถเข้าสู่ระบบได้';
+      toast({
+        variant: 'destructive',
+        title: 'เกิดข้อผิดพลาด',
+        description: errorMessage,
       });
     } finally {
-      setLoading(false);
+      setIsLoading(prev => ({ ...prev, emailSignIn: false }));
     }
   };
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      setLoading(true);
+      setIsLoading(prev => ({ ...prev, emailSignUp: true }));
       const { error } = await signUpWithEmail(email, password);
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "เกิดข้อผิดพลาด",
-          description: error.message || "ไม่สามารถสมัครสมาชิกได้"
-        });
-      } else {
-        toast({
-          title: "สมัครสมาชิกสำเร็จ",
-          description: "กรุณาตรวจสอบอีเมลเพื่อยืนยันบัญชี"
-        });
-      }
-    } catch (error: any) {
+      
+      if (error) throw error;
+      
       toast({
-        variant: "destructive",
-        title: "เกิดข้อผิดพลาด",
-        description: error.message || "ไม่สามารถสมัครสมาชิกได้"
+        title: 'สมัครสมาชิกสำเร็จ',
+        description: 'กรุณาตรวจสอบอีเมลเพื่อยืนยันบัญชีของคุณ',
+      });
+      
+      // Reset form after successful signup
+      setEmail('');
+      setPassword('');
+      
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'ไม่สามารถสมัครสมาชิกได้';
+      toast({
+        variant: 'destructive',
+        title: 'เกิดข้อผิดพลาด',
+        description: errorMessage,
       });
     } finally {
-      setLoading(false);
+      setIsLoading(prev => ({ ...prev, emailSignUp: false }));
     }
   };
 
@@ -108,12 +116,21 @@ const Auth = () => {
           <div className="space-y-4">
             <Button
               onClick={handleGoogleSignIn}
-              disabled={loading}
+              disabled={isLoading.google}
               variant="outline"
               className="w-full flex items-center gap-2"
             >
-              <FcGoogle className="h-5 w-5" />
-              เข้าสู่ระบบด้วย Google
+              {isLoading.google ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  กำลังดำเนินการ...
+                </>
+              ) : (
+                <>
+                  <FcGoogle className="h-5 w-5" />
+                  เข้าสู่ระบบด้วย Google
+                </>
+              )}
             </Button>
 
             <div className="relative">
@@ -155,8 +172,15 @@ const Auth = () => {
                       required
                     />
                   </div>
-                  <Button type="submit" disabled={loading} className="w-full">
-                    {loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
+                  <Button type="submit" disabled={isLoading.emailSignIn} className="w-full">
+                    {isLoading.emailSignIn ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        กำลังเข้าสู่ระบบ...
+                      </>
+                    ) : (
+                      'เข้าสู่ระบบ'
+                    )}
                   </Button>
                 </form>
               </TabsContent>
@@ -185,8 +209,15 @@ const Auth = () => {
                       required
                     />
                   </div>
-                  <Button type="submit" disabled={loading} className="w-full">
-                    {loading ? 'กำลังสมัครสมาชิก...' : 'สมัครสมาชิก'}
+                  <Button type="submit" disabled={isLoading.emailSignUp} className="w-full">
+                    {isLoading.emailSignUp ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        กำลังสมัครสมาชิก...
+                      </>
+                    ) : (
+                      'สมัครสมาชิก'
+                    )}
                   </Button>
                 </form>
               </TabsContent>

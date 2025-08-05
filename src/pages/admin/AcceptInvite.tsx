@@ -1,193 +1,231 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/use-toast';
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
+import type { AdminInvite, UserRole } from '@/types/admin';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+
+interface InviteData extends Omit<AdminInvite, 'token' | 'invited_by'> {}
 
 export default function AcceptInvite() {
   const [searchParams] = useSearchParams();
-  const { user, signInWithGoogle, signInWithEmail } = useAuth();
+  const { user, signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [invite, setInvite] = useState<{
-    id: string;
-    email: string;
-    role: 'admin' | 'moderator';
-    expires_at: string;
-    used_at: string | null;
-  } | null>(null);
+  const [invite, setInvite] = useState<InviteData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [isCompleting, setIsCompleting] = useState(false);
+  const [isNewUser, setIsNewUser] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const token = searchParams.get('token');
 
   useEffect(() => {
-    const verifyInvite = async () => {
-      if (!token) {
-        setError('No invite token provided');
-        setLoading(false);
-        return;
-      }
-
+    const verifyInvite = async (token: string) => {
       try {
-        const { data, error: inviteError } = await supabase.rpc('get_invite_by_token', {
-        p_token: token,
-        p_current_time: new Date().toISOString()
-      });
+        const { data, error } = await supabase
+          .from('admin_invites')
+          .select('*')
+          .eq('token', token)
+          .is('used_at', null)
+          .gt('expires_at', new Date().toISOString())
+          .single();
 
-        if (inviteError || !data) {
-          throw new Error('Invalid or expired invite');
-        }
+        if (error) throw error;
+        if (!data) throw new Error('Invalid or expired invitation');
 
-        setInvite(data);
+        setInvite(data as AdminInvite);
         setEmail(data.email);
+        setError(null);
       } catch (err) {
         console.error('Error verifying invite:', err);
-        setError('Invalid or expired invite link');
+        setError('ลิงก์เชิญไม่ถูกต้องหรือหมดอายุแล้ว');
       } finally {
         setLoading(false);
       }
     };
 
-    verifyInvite();
+    if (!token) {
+      setError('ไม่พบลิงก์เชิญ');
+      setLoading(false);
+    } else {
+      verifyInvite(token);
+    }
   }, [token]);
 
-  const handleAcceptInvite = async () => {
-    if (!invite) return;
+  // Handle user state changes
+  useEffect(() => {
+    if (user && invite) {
+      if (user.email === invite.email) {
+        assignAdminRole(user.id);
+      } else {
+        setError(`กรุณาเข้าสู่ระบบด้วยอีเมล: ${invite.email}`);
+        supabase.auth.signOut();
+      }
+    }
+  }, [user, invite]);
 
+  const assignAdminRole = async (userId: string) => {
+    if (!invite) return;
+    
     try {
-      setIsCompleting(true);
-      
+      const { error: roleError } = await supabase
+        .from('admin_roles')
+        .insert([
+          { 
+            user_id: userId, 
+            role: invite.role 
+          }
+        ]);
+
+      if (roleError) throw roleError;
+
       // Mark invite as used
-      const { error: updateError } = await supabase
+      const { error: inviteError } = await supabase
         .from('admin_invites')
         .update({ used_at: new Date().toISOString() })
         .eq('id', invite.id);
 
-      if (updateError) throw updateError;
-
-      // Add user to admin_roles
-      const { error: roleError } = await supabase
-        .from('admin_roles')
-        .insert([{ user_id: user!.id, role: invite.role }]);
-
-      if (roleError) throw roleError;
+      if (inviteError) throw inviteError;
 
       toast({
-        title: 'Success!',
-        description: `You've been added as an ${invite.role}`,
+        title: 'สำเร็จ',
+        description: `คุณได้รับการแต่งตั้งเป็น${invite.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ผู้ดูแล'}`,
       });
 
       // Redirect to admin dashboard
-      navigate('/admin');
+      window.location.href = '/admin';
     } catch (err) {
-      console.error('Error accepting invite:', err);
-      setError('Failed to accept invite. Please try again.');
-    } finally {
-      setIsCompleting(false);
+      console.error('Error assigning admin role:', err);
+      setError('เกิดข้อผิดพลาดในการแต่งตั้งบทบาท');
     }
   };
 
-  const assignAdminRole = async () => {
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) {
+      setError('กรุณากรอกอีเมลและรหัสผ่าน');
+      return;
+    }
+    if (email !== invite?.email) {
+      setError(`กรุณาใช้อีเมล: ${invite?.email}`);
+      return;
+    }
+    
     try {
-      // Mark invite as used
-      const { error: updateError } = await supabase
-        .from('admin_invites')
-        .update({ used_at: new Date().toISOString() })
-        .eq('id', invite!.id);
-
-      if (updateError) throw updateError;
-
-      // Add user to admin_roles
-      const { error: roleError } = await supabase
-        .from('admin_roles')
-        .insert([{ user_id: user!.id, role: invite!.role }]);
-
-      if (roleError) throw roleError;
-
-      toast({
-        title: 'Success!',
-        description: `You've been added as an ${invite!.role}`,
-      });
-
-      // Redirect to admin dashboard
-      navigate('/admin');
-    } catch (err) {
-      console.error('Error assigning admin role:', err);
-      setError('Failed to assign admin role. Please try again.');
+      setIsLoggingIn(true);
+      const { error } = await signUpWithEmail(email, password);
+      if (error) {
+        if (error.message.includes('already registered')) {
+          setError('อีเมลนี้ได้ลงทะเบียนแล้ว กรุณาลองเข้าสู่ระบบ');
+          setIsNewUser(false);
+        } else {
+          throw error;
+        }
+      } else {
+        // Update user metadata after successful signup
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await supabase.auth.updateUser({
+            data: { full_name: fullName }
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error signing up:', error);
+      setError('ไม่สามารถสมัครสมาชิกได้: ' + (error instanceof Error ? error.message : 'เกิดข้อผิดพลาด'));
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !password) {
+      setError('กรุณากรอกอีเมลและรหัสผ่าน');
+      return;
+    }
+    if (email !== invite?.email) {
+      setError(`กรุณาใช้อีเมล: ${invite?.email}`);
+      return;
+    }
+    
     try {
-      setLoading(true);
-      
-      // First check if email matches the invite
-      if (email !== invite?.email) {
-        setError('Please use the email address that was invited');
-        return;
-      }
-      
+      setIsLoggingIn(true);
       const { error } = await signInWithEmail(email, password);
-      if (error) throw error;
-      
-      await assignAdminRole();
+      if (error) {
+        if (error.message.includes('Invalid login credentials')) {
+          setIsNewUser(true);
+          setError('ไม่พบผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+        } else if (error.message.includes('Email not confirmed')) {
+          setError('กรุณายืนยันอีเมลของคุณก่อนเข้าสู่ระบบ');
+        } else {
+          throw error;
+        }
+      }
     } catch (error) {
-      console.error('Error signing in with email:', error);
-      setError(error instanceof Error ? error.message : 'Failed to sign in');
+      console.error('Error signing in:', error);
+      setError('เกิดข้อผิดพลาดในการเข้าสู่ระบบ: ' + (error instanceof Error ? error.message : 'โปรดลองอีกครั้ง'));
     } finally {
-      setLoading(false);
+      setIsLoggingIn(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
     try {
-      setLoading(true);
-      const { error } = await signInWithGoogle();
-      if (error) throw error;
-      
-      // After successful Google sign-in, check if user email matches invite
-      if (user?.email !== invite?.email) {
-        setError('Please sign in with the email address that was invited');
-        await supabase.auth.signOut();
-        return;
-      }
-      
-      await assignAdminRole();
+      setIsLoggingIn(true);
+      await signInWithGoogle();
+      // If successful, the user will be redirected or the auth state will update
     } catch (error) {
       console.error('Error signing in with Google:', error);
-      setError(error instanceof Error ? error.message : 'Failed to sign in with Google');
+      const errorMessage = error instanceof Error ? error.message : 'ไม่ทราบสาเหตุ';
+      
+      if (errorMessage.includes('OAuth account not linked')) {
+        setError('บัญชี Google นี้ยังไม่ได้เชื่อมต่อกับบัญชีผู้ใช้');
+      } else {
+        setError(`ไม่สามารถเข้าสู่ระบบด้วย Google ได้ในขณะนี้: ${errorMessage}`);
+      }
     } finally {
-      setLoading(false);
+      setIsLoggingIn(false);
     }
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+        <p className="text-muted-foreground">กำลังตรวจสอบลิงก์เชิญ...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto p-6 max-w-md">
-        <div className="text-center space-y-4">
-          <XCircle className="h-12 w-12 text-destructive mx-auto" />
-          <h1 className="text-2xl font-bold">Invite Error</h1>
-          <p className="text-muted-foreground">{error}</p>
-          <Button onClick={() => navigate('/')} className="mt-4">
-            Return Home
-          </Button>
-        </div>
+      <div className="container mx-auto p-6 max-w-md flex items-center justify-center min-h-screen">
+        <Card className="w-full">
+          <CardHeader>
+            <div className="text-center space-y-2">
+              <XCircle className="h-12 w-12 text-destructive mx-auto" />
+              <CardTitle className="text-xl">เกิดข้อผิดพลาด</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4 text-center">
+            <p className="text-muted-foreground">{error}</p>
+            <Button 
+              onClick={() => navigate('/')} 
+              className="w-full"
+            >
+              กลับหน้าหลัก
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -311,18 +349,18 @@ export default function AcceptInvite() {
         </p>
         
         <div className="pt-4">
-          <Button 
-            onClick={handleAcceptInvite}
-            disabled={isCompleting}
+          <Button
+            type="submit"
             className="w-full"
+            disabled={isLoggingIn}
           >
-            {isCompleting ? (
+            {isLoggingIn ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Processing...
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                กำลังดำเนินการ...
               </>
             ) : (
-              `Accept ${invite.role === 'admin' ? 'Admin' : 'Moderator'} Invitation`
+              'ยืนยันการเป็นผู้ดูแลระบบ'
             )}
           </Button>
         </div>
