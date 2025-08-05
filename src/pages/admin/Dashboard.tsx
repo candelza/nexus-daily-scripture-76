@@ -6,9 +6,10 @@ import { checkAdminAccess, checkIsAdmin, getAdminUsers, createAdminInvite, Admin
 import { useToast } from '@/components/ui/use-toast';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Plus, Users, BookOpen, UserPlus } from 'lucide-react';
+import { Loader2, Plus, Users, BookOpen, UserPlus, Shield } from 'lucide-react';
 import AdminUsersTab from '@/components/admin/AdminUsersTab';
 import PrayerTopicsTab from '@/components/admin/PrayerTopicsTab';
+import AdminPermissionsTab from '@/components/admin/AdminPermissionsTab';
 
 export default function AdminDashboard() {
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
@@ -81,7 +82,7 @@ export default function AdminDashboard() {
         className="w-full"
         onValueChange={setActiveTab}
       >
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-4 max-w-md mb-6">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-4 max-w-2xl mb-6">
           <TabsTrigger value="prayer-topics" className="flex items-center gap-2">
             <BookOpen className="h-4 w-4" />
             <span className="hidden sm:inline">Prayer Topics</span>
@@ -90,6 +91,12 @@ export default function AdminDashboard() {
             <TabsTrigger value="admin-users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Admin Users</span>
+            </TabsTrigger>
+          )}
+          {isAdmin && (
+            <TabsTrigger value="permissions" className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              <span className="hidden sm:inline">Permissions</span>
             </TabsTrigger>
           )}
         </TabsList>
@@ -101,6 +108,12 @@ export default function AdminDashboard() {
         {isAdmin && (
           <TabsContent value="admin-users">
             <AdminUsersTab />
+          </TabsContent>
+        )}
+        
+        {isAdmin && (
+          <TabsContent value="permissions">
+            <AdminPermissionsTab />
           </TabsContent>
         )}
       </Tabs>

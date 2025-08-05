@@ -5,6 +5,8 @@ import { ScriptureCard } from '@/components/ScriptureCard';
 import { ProgressTracker } from '@/components/ProgressTracker';
 import PrayerSection from '@/components/PrayerSection';
 import PrayerExamples from '@/components/PrayerExamples';
+import ScriptureCalendar from '@/components/ScriptureCalendar';
+import YearlyReadingPlan from '@/components/YearlyReadingPlan';
 import { Button } from '@/components/ui/button';
 import { getTodayReading, BibleReading } from '@/data/bibleReadings';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
@@ -296,6 +298,10 @@ const Index = () => {
             ))}
           </div>
         </div>
+
+        <ScriptureCalendar />
+        
+        <YearlyReadingPlan />
         
         <PrayerSection />
         <PrayerExamples />

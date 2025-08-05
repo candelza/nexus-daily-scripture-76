@@ -4,7 +4,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Heart, MessageCircle, Users, Loader2, Send } from 'lucide-react';
+import { Heart, MessageCircle, Users, Loader2, Send, Share2, Facebook, MessageSquare } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -307,6 +307,54 @@ const PrayerExamples = () => {
     }
   };
 
+  const shareToFacebook = (prayer: PrayerWithProfile) => {
+    const userName = prayer.display_name || 
+                    prayer.profiles?.display_name || 
+                    prayer.profiles?.email?.split('@')[0] || 
+                    'ผู้ใช้งาน';
+    
+    const shareText = `🙏 คำอธิษฐานจาก ${userName}\n\n"${prayer.title}"\n\n${prayer.content}\n\nร่วมอธิษฐานเพื่อกันและกัน 💝`;
+    const shareUrl = window.location.href;
+    
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
+    window.open(facebookUrl, '_blank', 'width=600,height=400');
+  };
+
+  const shareToLine = (prayer: PrayerWithProfile) => {
+    const userName = prayer.display_name || 
+                    prayer.profiles?.display_name || 
+                    prayer.profiles?.email?.split('@')[0] || 
+                    'ผู้ใช้งาน';
+    
+    const shareText = `🙏 คำอธิษฐานจาก ${userName}\n\n"${prayer.title}"\n\n${prayer.content}\n\nร่วมอธิษฐานเพื่อกันและกัน 💝\n\n${window.location.href}`;
+    
+    const lineUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(shareText)}`;
+    window.open(lineUrl, '_blank', 'width=600,height=400');
+  };
+
+  const copyToClipboard = async (prayer: PrayerWithProfile) => {
+    const userName = prayer.display_name || 
+                    prayer.profiles?.display_name || 
+                    prayer.profiles?.email?.split('@')[0] || 
+                    'ผู้ใช้งาน';
+    
+    const shareText = `🙏 คำอธิษฐานจาก ${userName}\n\n"${prayer.title}"\n\n${prayer.content}\n\nร่วมอธิษฐานเพื่อกันและกัน 💝\n\n${window.location.href}`;
+    
+    try {
+      await navigator.clipboard.writeText(shareText);
+      toast({
+        title: 'คัดลอกแล้ว',
+        description: 'คัดลอกคำอธิษฐานไปยังคลิปบอร์ดแล้ว'
+      });
+    } catch (error) {
+      toast({
+        title: 'เกิดข้อผิดพลาด',
+        description: 'ไม่สามารถคัดลอกได้',
+        variant: 'destructive'
+      });
+    }
+  };
+
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -419,7 +467,7 @@ const PrayerExamples = () => {
                   </div>
 
                   {/* Interaction buttons */}
-                  <div className="flex items-center gap-4 mt-4 pt-4 border-t border-border">
+                  <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border flex-wrap">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -445,6 +493,39 @@ const PrayerExamples = () => {
                       <MessageCircle className="h-4 w-4" />
                       <span className="text-sm">{prayer.comment_count || 0} ตอบกลับ</span>
                     </Button>
+
+                    {/* Share buttons */}
+                    <div className="flex items-center gap-1 ml-auto">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => shareToFacebook(prayer)}
+                        className="flex items-center gap-1 text-muted-foreground hover:text-blue-600 transition-colors"
+                        title="แชร์ไป Facebook"
+                      >
+                        <Facebook className="h-4 w-4" />
+                      </Button>
+                      
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => shareToLine(prayer)}
+                        className="flex items-center gap-1 text-muted-foreground hover:text-green-500 transition-colors"
+                        title="แชร์ไป Line"
+                      >
+                        <MessageSquare className="h-4 w-4" />
+                      </Button>
+                      
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyToClipboard(prayer)}
+                        className="flex items-center gap-1 text-muted-foreground hover:text-gray-600 transition-colors"
+                        title="คัดลอก"
+                      >
+                        <Share2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
 
                   {/* Comments section */}

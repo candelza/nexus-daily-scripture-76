@@ -23,11 +23,21 @@ interface UserGroup {
   description: string | null;
 }
 
+interface GroupMembership {
+  id: string;
+  group_id: string;
+  user_groups: UserGroup;
+}
+
 const ProfileManager = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [currentGroupId, setCurrentGroupId] = useState<string>('');
+  const [availableGroups, setAvailableGroups] = useState<UserGroup[]>([]);
+  const [userGroups, setUserGroups] = useState<GroupMembership[]>([]);
+  const [selectedGroupId, setSelectedGroupId] = useState<string>('');
+  const [customGroupName, setCustomGroupName] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -37,7 +47,8 @@ const ProfileManager = () => {
   useEffect(() => {
     if (user) {
       fetchProfile();
-      fetchCurrentGroup();
+      fetchAvailableGroups();
+      fetchUserGroups();
     }
   }, [user]);
 
@@ -56,6 +67,7 @@ const ProfileManager = () => {
       if (data) {
         setProfile(data);
         setDisplayName(data.display_name || '');
+        setEmail(data.email || user?.email || '');
         setAddress(data.address || '');
       }
     } catch (error: any) {
@@ -69,15 +81,39 @@ const ProfileManager = () => {
   };
 
 
-  const fetchCurrentGroup = async () => {
+  const fetchAvailableGroups = async () => {
     try {
-      // Get from localStorage for now
-      const savedGroup = localStorage.getItem(`user_group_${user?.id}`);
-      if (savedGroup) {
-        setCurrentGroupId(savedGroup);
-      }
+      const { data, error } = await supabase
+        .from('user_groups')
+        .select('*')
+        .order('name');
+
+      if (error) throw error;
+      setAvailableGroups(data || []);
     } catch (error: any) {
-      console.error('Error fetching current group:', error);
+      console.error('Error fetching available groups:', error);
+    }
+  };
+
+  const fetchUserGroups = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('group_memberships')
+        .select(`
+          id,
+          group_id,
+          user_groups:group_id (
+            id,
+            name,
+            description
+          )
+        `)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+      setUserGroups(data || []);
+    } catch (error: any) {
+      console.error('Error fetching user groups:', error);
     }
   };
 
@@ -168,22 +204,85 @@ const ProfileManager = () => {
         .from('profiles')
         .update({ 
           display_name: displayName,
+          email: email,
           address: address 
         })
         .eq('user_id', user?.id);
 
       if (profileError) throw profileError;
 
-      // Store group selection in localStorage for now
-      if (currentGroupId) {
-        localStorage.setItem(`user_group_${user?.id}`, currentGroupId);
+      // Handle group membership
+      if (selectedGroupId) {
+        // Check if user is already in this group
+        const existingMembership = userGroups.find(ug => ug.group_id === selectedGroupId);
+        
+        if (!existingMembership) {
+          const { error: membershipError } = await supabase
+            .from('group_memberships')
+            .insert({
+              user_id: user?.id,
+              group_id: selectedGroupId
+            });
+
+          if (membershipError) throw membershipError;
+        }
+      }
+
+      // Handle custom group creation
+      if (customGroupName.trim()) {
+        // Check if group already exists
+        const existingGroup = availableGroups.find(g => 
+          g.name.toLowerCase() === customGroupName.trim().toLowerCase()
+        );
+
+        let groupId = existingGroup?.id;
+
+        if (!existingGroup) {
+          // Create new group
+          const { data: newGroup, error: groupError } = await supabase
+            .from('user_groups')
+            .insert({
+              name: customGroupName.trim(),
+              description: `กลุ่มที่สร้างโดย ${displayName || email}`
+            })
+            .select()
+            .single();
+
+          if (groupError) throw groupError;
+          groupId = newGroup.id;
+        }
+
+        if (groupId) {
+          // Join the group
+          const existingMembership = userGroups.find(ug => ug.group_id === groupId);
+          
+          if (!existingMembership) {
+            const { error: membershipError } = await supabase
+              .from('group_memberships')
+              .insert({
+                user_id: user?.id,
+                group_id: groupId
+              });
+
+            if (membershipError) throw membershipError;
+          }
+        }
       }
 
       setProfile(prev => prev ? { 
         ...prev, 
         display_name: displayName,
+        email: email,
         address: address 
       } : null);
+
+      // Refresh data
+      await fetchAvailableGroups();
+      await fetchUserGroups();
+      
+      // Clear form fields
+      setSelectedGroupId('');
+      setCustomGroupName('');
       
       toast({
         title: "สำเร็จ",
@@ -199,6 +298,31 @@ const ProfileManager = () => {
       });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleLeaveGroup = async (membershipId: string) => {
+    try {
+      const { error } = await supabase
+        .from('group_memberships')
+        .delete()
+        .eq('id', membershipId);
+
+      if (error) throw error;
+
+      await fetchUserGroups();
+      
+      toast({
+        title: "สำเร็จ",
+        description: "ออกจากกลุ่มเรียบร้อยแล้ว"
+      });
+    } catch (error: any) {
+      console.error('Error leaving group:', error);
+      toast({
+        variant: "destructive",
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถออกจากกลุ่มได้"
+      });
     }
   };
 
@@ -268,34 +392,97 @@ const ProfileManager = () => {
           />
         </div>
 
-        {/* Email (Read-only) */}
+        {/* Email */}
         <div className="space-y-2">
           <Label htmlFor="email">อีเมล</Label>
           <Input
             id="email"
-            value={profile?.email || user?.email || ''}
-            disabled
-            className="bg-muted cursor-not-allowed"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="กรอกอีเมลของคุณ"
           />
           <p className="text-xs text-muted-foreground">
-            อีเมลไม่สามารถแก้ไขได้
+            อีเมลที่ใช้สำหรับการติดต่อ
           </p>
         </div>
 
-        {/* Group Selection */}
+        {/* Current Groups */}
+        {userGroups.length > 0 && (
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              กลุ่มที่เข้าร่วมแล้ว
+            </Label>
+            <div className="space-y-2">
+              {userGroups.map((membership) => (
+                <div key={membership.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <div className="font-medium">{membership.user_groups.name}</div>
+                    {membership.user_groups.description && (
+                      <div className="text-sm text-muted-foreground">
+                        {membership.user_groups.description}
+                      </div>
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleLeaveGroup(membership.id)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    ออก
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Join Existing Group */}
         <div className="space-y-2">
-          <Label htmlFor="group" className="flex items-center gap-2">
+          <Label htmlFor="selectGroup" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
-            กลุ่ม
+            เข้าร่วมกลุ่มที่มีอยู่
+          </Label>
+          <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
+            <SelectTrigger>
+              <SelectValue placeholder="เลือกกลุ่มที่ต้องการเข้าร่วม" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableGroups
+                .filter(group => !userGroups.some(ug => ug.group_id === group.id))
+                .map((group) => (
+                  <SelectItem key={group.id} value={group.id}>
+                    <div>
+                      <div className="font-medium">{group.name}</div>
+                      {group.description && (
+                        <div className="text-sm text-muted-foreground">
+                          {group.description}
+                        </div>
+                      )}
+                    </div>
+                  </SelectItem>
+                ))
+              }
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Create New Group */}
+        <div className="space-y-2">
+          <Label htmlFor="customGroup" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            สร้างกลุ่มใหม่
           </Label>
           <Input
-            id="group"
-            value={currentGroupId}
-            onChange={(e) => setCurrentGroupId(e.target.value)}
-            placeholder="พิมพ์ชื่อกลุ่มของคุณ"
+            id="customGroup"
+            value={customGroupName}
+            onChange={(e) => setCustomGroupName(e.target.value)}
+            placeholder="พิมพ์ชื่อกลุ่มใหม่ที่ต้องการสร้าง"
           />
           <p className="text-xs text-muted-foreground">
-            พิมพ์ชื่อกลุ่มที่คุณต้องการเข้าร่วม
+            หากไม่มีกลุ่มที่ต้องการ สามารถสร้างกลุ่มใหม่ได้
           </p>
         </div>
 

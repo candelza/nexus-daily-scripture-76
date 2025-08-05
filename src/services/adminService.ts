@@ -144,6 +144,24 @@ export const updatePrayerTopic = async (id: string, updates: Partial<PrayerTopic
   return data;
 };
 
+export const updateAdminRole = async (userId: string, role: 'admin' | 'moderator'): Promise<void> => {
+  const { error } = await supabase
+    .from('admin_roles')
+    .update({ role })
+    .eq('user_id', userId);
+    
+  if (error) throw error;
+};
+
+export const removeAdminRole = async (userId: string): Promise<void> => {
+  const { error } = await supabase
+    .from('admin_roles')
+    .delete()
+    .eq('user_id', userId);
+    
+  if (error) throw error;
+};
+
 const generateRandomToken = async (length: number): Promise<string> => {
   const { data, error } = await supabase.rpc('generate_random_token', { length });
   if (error) throw error;
