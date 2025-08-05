@@ -36,6 +36,16 @@ const PrayerSection = () => {
     if (user) {
       loadUserProfile();
     }
+    // Listen for page visibility changes to reload group info
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && user) {
+        loadUserProfile();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [user]);
 
   const loadUserProfile = async () => {
@@ -73,12 +83,8 @@ const PrayerSection = () => {
         setCurrentGroup('ยังไม่ได้เลือกกลุ่ม');
       } else if (groupData?.user_groups?.name) {
         setCurrentGroup(groupData.user_groups.name);
-        // Store the group name in local storage for quick access
-        localStorage.setItem(`user_group_${user?.id}`, groupData.user_groups.name);
       } else {
         setCurrentGroup('ยังไม่ได้เลือกกลุ่ม');
-        // Clear any previously stored group
-        localStorage.removeItem(`user_group_${user?.id}`);
       }
     } catch (error) {
       console.error('Error loading user data:', error);
