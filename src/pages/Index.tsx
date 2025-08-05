@@ -41,74 +41,98 @@ const Index = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   
-  // Load today's reading
-  useEffect(() => {
-    let isMounted = true;
+  // Function to load today's reading
+  const loadReading = async () => {
+    console.log('Starting to load reading...');
+    setIsLoading(true);
+    setError(null);
     
-    const loadReading = async () => {
-      if (!isMounted) return;
+    try {
+      console.log('Fetching today\'s reading...');
+      const reading = await getTodayReading();
+      console.log('Received reading:', reading);
       
-      setIsLoading(true);
-      setError(null);
+      if (!reading) {
+        throw new Error('No reading data received');
+      }
       
+      setTodayReading(reading);
+      
+      // Transform the reading data into the format expected by ScriptureCard
+      const formattedScriptures: ScriptureItem[] = [
+        {
+          id: `ot-${reading.date || 'today'}`,
+          book: reading.oldTestament?.book || '',
+          chapter: parseInt(reading.oldTestament?.chapter || '1'),
+          verses: reading.oldTestament?.verses || '',
+          text: reading.oldTestament?.text || '',
+          theme: 'พระคัมภีร์เดิม'
+        },
+        {
+          id: `nt-${reading.date || 'today'}`,
+          book: reading.newTestament?.book || '',
+          chapter: parseInt(reading.newTestament?.chapter || '1'),
+          verses: reading.newTestament?.verses || '',
+          text: reading.newTestament?.text || '',
+          theme: 'พระคัมภีร์ใหม่'
+        },
+        {
+          id: `psalm-${reading.date || 'today'}`,
+          book: reading.psalm?.book || '',
+          chapter: parseInt(reading.psalm?.chapter || '1'),
+          verses: reading.psalm?.verses || '',
+          text: reading.psalm?.text || '',
+          theme: 'สดุดี'
+        }
+      ].filter(reading => reading.book && reading.text);
+      
+      console.log('Formatted scriptures:', formattedScriptures);
+      setScriptures(formattedScriptures);
+      
+      if (formattedScriptures.length === 0) {
+        console.warn('No valid scripture entries found');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('Error loading reading:', error);
+      console.error('Error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: errorMessage,
+        stack: error instanceof Error ? error.stack : 'No stack trace'
+      });
+      
+      setError(`ไม่สามารถโหลดข้อพระคัมภีร์ได้: ${errorMessage}`);
+      toast({
+        variant: 'destructive',
+        title: 'เกิดข้อผิดพลาด',
+        description: `ไม่สามารถโหลดข้อพระคัมภีร์ได้: ${errorMessage}`,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Load today's reading on component mount
+  useEffect(() => {
+    console.log('Component mounted, loading reading...');
+    const loadData = async () => {
       try {
-        const reading = await getTodayReading();
-        
-        if (isMounted) {
-          setTodayReading(reading);
-          
-          // Transform the reading data into the format expected by ScriptureCard
-          const formattedScriptures: ScriptureItem[] = [
-            {
-              id: `ot-${reading?.date || 'today'}`,
-              book: reading?.oldTestament?.book || '',
-              chapter: parseInt(reading?.oldTestament?.chapter || '1'),
-              verses: reading?.oldTestament?.verses || '',
-              text: reading?.oldTestament?.text || '',
-              theme: 'พระคัมภีร์เดิม'
-            },
-            {
-              id: `nt-${reading?.date || 'today'}`,
-              book: reading?.newTestament?.book || '',
-              chapter: parseInt(reading?.newTestament?.chapter || '1'),
-              verses: reading?.newTestament?.verses || '',
-              text: reading?.newTestament?.text || '',
-              theme: 'พระคัมภีร์ใหม่'
-            },
-            {
-              id: `psalm-${reading?.date || 'today'}`,
-              book: reading?.psalm?.book || '',
-              chapter: parseInt(reading?.psalm?.chapter || '1'),
-              verses: reading?.psalm?.verses || '',
-              text: reading?.psalm?.text || '',
-              theme: 'สดุดี'
-            }
-          ].filter(reading => reading.book && reading.text);
-          
-          setScriptures(formattedScriptures);
-        }
+        await loadReading();
       } catch (error) {
-        console.error('Error loading reading:', error);
-        if (isMounted) {
-          setError('ไม่สามารถโหลดข้อพระคัมภีร์ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง');
-          toast({
-            variant: 'destructive',
-            title: 'เกิดข้อผิดพลาด',
-            description: 'ไม่สามารถโหลดข้อพระคัมภีร์ได้ในขณะนี้',
-          });
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        console.error('Error in loadData effect:', error);
       }
     };
     
-    loadReading();
+    loadData();
     
-    return () => {
-      isMounted = false;
-    };
+    // Add a timeout to check if loading is stuck
+    const timeoutId = setTimeout(() => {
+      if (isLoading) {
+        console.warn('Loading is taking too long, current state:', { isLoading, error, scriptures });
+      }
+    }, 5000);
+    
+    return () => clearTimeout(timeoutId);
   }, []);
 
   // Handle mark as read
@@ -167,23 +191,40 @@ const Index = () => {
     );
   }
 
-  // No readings available
-  if (scriptures.length === 0) {
+ // No readings available or error state
+  if (scriptures.length === 0 || !todayReading) {
     return (
       <div className="min-h-screen bg-background">
         <Header currentDate={currentDate} onDateChange={setCurrentDate} />
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="text-center space-y-4">
             <XCircle className="h-12 w-12 text-muted-foreground mx-auto" />
-            <h2 className="text-xl font-semibold">ไม่พบข้อพระคัมภีร์สำหรับวันนี้</h2>
-            <p className="text-muted-foreground">กรุณาลองใหม่อีกครั้งในภายหลัง</p>
-            <Button 
-              variant="outline" 
-              onClick={() => window.location.reload()}
-              className="mt-4"
-            >
-              โหลดใหม่
-            </Button>
+            <h2 className="text-xl font-semibold">
+              {error ? 'เกิดข้อผิดพลาด' : 'ไม่พบข้อพระคัมภีร์สำหรับวันนี้'}
+            </h2>
+            <p className="text-muted-foreground">
+              {error || 'กรุณาลองใหม่อีกครั้งในภายหลัง'}
+            </p>
+            <div className="flex justify-center gap-4">
+              <Button 
+                variant="outline" 
+                onClick={() => window.location.reload()}
+                className="mt-4"
+              >
+                โหลดใหม่
+              </Button>
+              <Button 
+                variant="default" 
+                onClick={() => {
+                  setError(null);
+                  setIsLoading(true);
+                  setTimeout(() => loadReading(), 500);
+                }}
+                className="mt-4"
+              >
+                ลองอีกครั้ง
+              </Button>
+            </div>
           </div>
         </div>
       </div>

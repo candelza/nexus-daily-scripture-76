@@ -36,12 +36,16 @@ export interface DailyReading {
 }
 
 // Get today's reading from Supabase
-export const getTodayReading = async (): Promise<BibleReading | null> => {
+export const getTodayReading = async (): Promise<BibleReading> => {
   const today = new Date().toISOString().split('T')[0];
-  console.log('Fetching reading for date:', today);
+  console.log('🔍 [bibleReadings] Fetching reading for date:', today);
   
   try {
-    console.log('Supabase client:', supabase);
+    if (!supabase) {
+      throw new Error('Supabase client is not initialized');
+    }
+    
+    console.log('🔍 [bibleReadings] Supabase client initialized, fetching data...');
     
     const { data, error } = await supabase
       .from('daily_readings')
@@ -49,17 +53,21 @@ export const getTodayReading = async (): Promise<BibleReading | null> => {
       .eq('date', today)
       .maybeSingle();
 
-    console.log('Supabase response - data:', data, 'error:', error);
+    console.log('🔍 [bibleReadings] Supabase response:', { 
+      hasData: !!data, 
+      error: error?.message || 'No error',
+      dataKeys: data ? Object.keys(data) : 'No data'
+    });
 
     if (error) {
-      console.error('Error fetching today reading:', error);
+      console.error('❌ [bibleReadings] Error fetching today reading:', error);
       throw error;
     }
 
+    // If no data for today, return fallback data
     if (!data) {
-      console.log('No reading found for today, using fallback data');
-      // Return fallback data if no data found for today
-      return {
+      console.log('ℹ️ [bibleReadings] No reading found for today, using fallback data');
+      const fallbackData: BibleReading = {
         id: 'fallback',
         date: today,
         oldTestament: {
@@ -81,20 +89,63 @@ export const getTodayReading = async (): Promise<BibleReading | null> => {
           text: "พระเยโฮวาห์ทรงเป็นผู้เลี้ยงของข้าพเจ้า ข้าพเจ้าจะไม่ขาดแคลน พระองค์ทรงให้ข้าพเจ้านอนในลานหญ้าเขียว ทรงพาข้าพเจ้าไปยังน้ำสงบ"
         }
       };
+      console.log('📦 [bibleReadings] Returning fallback data:', fallbackData);
+      return fallbackData;
     }
 
-    console.log('Raw readings data:', data.readings);
-    const readings = data.readings as any;
+    console.log('📦 [bibleReadings] Raw data received:', JSON.stringify(data, null, 2));
     
-    const result = {
+    // Ensure we have the expected data structure
+    if (!data.readings || typeof data.readings !== 'object') {
+      console.warn('⚠️ [bibleReadings] Unexpected data structure, missing readings:', data);
+      throw new Error('Invalid data structure received from server');
+    }
+    
+    // Type assertion for the readings object
+    const readings = data.readings as {
+      oldTestament?: {
+        book?: string;
+        chapter?: string | number;
+        verses?: string;
+        text?: string;
+      };
+      newTestament?: {
+        book?: string;
+        chapter?: string | number;
+        verses?: string;
+        text?: string;
+      };
+      psalm?: {
+        book?: string;
+        chapter?: string | number;
+        verses?: string;
+        text?: string;
+      };
+    };
+    const result: BibleReading = {
       id: data.id,
       date: data.date,
-      oldTestament: readings.oldTestament,
-      newTestament: readings.newTestament,
-      psalm: readings.psalm
+      oldTestament: {
+        book: readings.oldTestament?.book || 'สุภาษิต',
+        chapter: readings.oldTestament?.chapter?.toString() || '3',
+        verses: readings.oldTestament?.verses || '5-6',
+        text: readings.oldTestament?.text || 'จงวางใจในพระเยโฮวาห์ด้วยสุดใจของเจ้า...'
+      },
+      newTestament: {
+        book: readings.newTestament?.book || 'ยอห์น',
+        chapter: readings.newTestament?.chapter?.toString() || '3',
+        verses: readings.newTestament?.verses || '16',
+        text: readings.newTestament?.text || 'เพราะพระเจ้าทรงรักโลกมาก...'
+      },
+      psalm: {
+        book: readings.psalm?.book || 'สดุดี',
+        chapter: readings.psalm?.chapter?.toString() || '23',
+        verses: readings.psalm?.verses || '1-6',
+        text: readings.psalm?.text || 'พระเยโฮวาห์ทรงเป็นผู้เลี้ยงของข้าพเจ้า...'
+      }
     };
     
-    console.log('Processed reading:', result);
+    console.log('✅ [bibleReadings] Successfully processed reading:', result);
     return result;
   } catch (error) {
     console.error('Error in getTodayReading:', error);

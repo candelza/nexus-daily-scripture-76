@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 interface ScriptureReading {
   id: string;
   book: string;
-  chapter: number;
+  chapter: number | string; // Updated to accept both number and string
   verses: string;
   text: string;
   theme?: string;
@@ -47,7 +47,7 @@ export const ScriptureCard = ({
     <Card className="p-6 transition-all duration-200 hover:shadow-lg">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg ${isRead ? 'bg-progress/20' : 'bg-accent/20'}`}>
+          <div className={`p-2 rounded-lg ${isRead ? 'bg-green-100' : 'bg-blue-100'}`}>
             <BookOpen className={`w-5 h-5 ${isRead ? 'text-progress' : 'text-accent-foreground'}`} />
           </div>
           <div>
