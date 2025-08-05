@@ -38,20 +38,26 @@ export interface DailyReading {
 // Get today's reading from Supabase
 export const getTodayReading = async (): Promise<BibleReading | null> => {
   const today = new Date().toISOString().split('T')[0];
+  console.log('Fetching reading for date:', today);
   
   try {
+    console.log('Supabase client:', supabase);
+    
     const { data, error } = await supabase
       .from('daily_readings')
       .select('*')
       .eq('date', today)
       .maybeSingle();
 
+    console.log('Supabase response - data:', data, 'error:', error);
+
     if (error) {
       console.error('Error fetching today reading:', error);
-      return null;
+      throw error;
     }
 
     if (!data) {
+      console.log('No reading found for today, using fallback data');
       // Return fallback data if no data found for today
       return {
         id: 'fallback',
@@ -77,17 +83,22 @@ export const getTodayReading = async (): Promise<BibleReading | null> => {
       };
     }
 
+    console.log('Raw readings data:', data.readings);
     const readings = data.readings as any;
-    return {
+    
+    const result = {
       id: data.id,
       date: data.date,
       oldTestament: readings.oldTestament,
       newTestament: readings.newTestament,
       psalm: readings.psalm
     };
+    
+    console.log('Processed reading:', result);
+    return result;
   } catch (error) {
     console.error('Error in getTodayReading:', error);
-    return null;
+    throw error; // Re-throw to be handled by the component
   }
 };
 

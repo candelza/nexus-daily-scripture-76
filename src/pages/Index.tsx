@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { XCircle } from 'lucide-react';
+import { XCircle, Loader2 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { ScriptureCard } from '@/components/ScriptureCard';
 import { ProgressTracker } from '@/components/ProgressTracker';
@@ -10,73 +10,133 @@ import { getTodayReading, BibleReading } from '@/data/bibleReadings';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { useAuth } from '@/hooks/useAuth';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from '@/components/ui/use-toast';
+
+// Define the structure for scripture items
+interface ScriptureItem {
+  id: string;
+  book: string;
+  chapter: number;
+  verses: string;
+  text: string;
+  theme: string;
+}
 
 const Index = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [todayReading, setTodayReading] = useState<BibleReading | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [scriptures, setScriptures] = useState<ScriptureItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
   const { 
-    currentStreak, 
-    totalReadThisMonth, 
-    yearProgress, 
+    currentStreak = 0, 
+    totalReadThisMonth = 0, 
+    yearProgress = 0, 
     markAsRead, 
     isRead, 
     isLoading: isProgressLoading 
   } = useReadingProgress();
+  
   const { user } = useAuth();
   const navigate = useNavigate();
   
+  // Load today's reading
   useEffect(() => {
+    let isMounted = true;
+    
     const loadReading = async () => {
-      setLoading(true);
+      if (!isMounted) return;
+      
+      setIsLoading(true);
+      setError(null);
+      
       try {
         const reading = await getTodayReading();
-        setTodayReading(reading);
+        
+        if (isMounted) {
+          setTodayReading(reading);
+          
+          // Transform the reading data into the format expected by ScriptureCard
+          const formattedScriptures: ScriptureItem[] = [
+            {
+              id: `ot-${reading?.date || 'today'}`,
+              book: reading?.oldTestament?.book || '',
+              chapter: parseInt(reading?.oldTestament?.chapter || '1'),
+              verses: reading?.oldTestament?.verses || '',
+              text: reading?.oldTestament?.text || '',
+              theme: 'พระคัมภีร์เดิม'
+            },
+            {
+              id: `nt-${reading?.date || 'today'}`,
+              book: reading?.newTestament?.book || '',
+              chapter: parseInt(reading?.newTestament?.chapter || '1'),
+              verses: reading?.newTestament?.verses || '',
+              text: reading?.newTestament?.text || '',
+              theme: 'พระคัมภีร์ใหม่'
+            },
+            {
+              id: `psalm-${reading?.date || 'today'}`,
+              book: reading?.psalm?.book || '',
+              chapter: parseInt(reading?.psalm?.chapter || '1'),
+              verses: reading?.psalm?.verses || '',
+              text: reading?.psalm?.text || '',
+              theme: 'สดุดี'
+            }
+          ].filter(reading => reading.book && reading.text);
+          
+          setScriptures(formattedScriptures);
+        }
       } catch (error) {
         console.error('Error loading reading:', error);
+        if (isMounted) {
+          setError('ไม่สามารถโหลดข้อพระคัมภีร์ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง');
+          toast({
+            variant: 'destructive',
+            title: 'เกิดข้อผิดพลาด',
+            description: 'ไม่สามารถโหลดข้อพระคัมภีร์ได้ในขณะนี้',
+          });
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
     
     loadReading();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  // Convert BibleReading to format expected by ScriptureCard
-  const readings = todayReading ? [
-    {
-      id: `ot-${todayReading.date}`,
-      book: todayReading.oldTestament.book,
-      chapter: parseInt(todayReading.oldTestament.chapter) || 1,
-      verses: todayReading.oldTestament.verses,
-      text: todayReading.oldTestament.text,
-      theme: "พระคัมภีร์เดิม"
-    },
-    {
-      id: `nt-${todayReading.date}`,
-      book: todayReading.newTestament.book,
-      chapter: parseInt(todayReading.newTestament.chapter) || 1,
-      verses: todayReading.newTestament.verses,
-      text: todayReading.newTestament.text,
-      theme: "พระคัมภีร์ใหม่"
-    },
-    {
-      id: `psalm-${todayReading.date}`,
-      book: todayReading.psalm.book,
-      chapter: parseInt(todayReading.psalm.chapter) || 1,
-      verses: todayReading.psalm.verses,
-      text: todayReading.psalm.text,
-      theme: "สดุดี"
+  // Handle mark as read
+  const handleMarkAsRead = (id: string) => {
+    try {
+      markAsRead(id);
+      toast({
+        title: 'บันทึกแล้ว',
+        description: 'บันทึกการอ่านเรียบร้อยแล้ว',
+      });
+    } catch (error) {
+      console.error('Error marking as read:', error);
+      toast({
+        variant: 'destructive',
+        title: 'เกิดข้อผิดพลาด',
+        description: 'ไม่สามารถบันทึกการอ่านได้ในขณะนี้',
+      });
     }
-  ].filter(reading => reading.book && reading.text) : []; // Filter out any invalid readings
+  };
 
-  if (loading || isProgressLoading) {
+  // Loading state
+  if (isLoading || isProgressLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Header currentDate={currentDate} onDateChange={setCurrentDate} />
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="text-center space-y-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent mx-auto"></div>
+            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
             <p className="text-muted-foreground">กำลังโหลดข้อพระคัมภีร์และความคืบหน้าของคุณ...</p>
           </div>
         </div>
@@ -84,7 +144,31 @@ const Index = () => {
     );
   }
 
-  if (!todayReading || readings.length === 0) {
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header currentDate={currentDate} onDateChange={setCurrentDate} />
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <div className="text-center space-y-4">
+            <XCircle className="h-12 w-12 text-destructive mx-auto" />
+            <h2 className="text-xl font-semibold">เกิดข้อผิดพลาด</h2>
+            <p className="text-muted-foreground">{error}</p>
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.reload()}
+              className="mt-4"
+            >
+              โหลดใหม่
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // No readings available
+  if (scriptures.length === 0) {
     return (
       <div className="min-h-screen bg-background">
         <Header currentDate={currentDate} onDateChange={setCurrentDate} />
@@ -136,7 +220,7 @@ const Index = () => {
           totalRead={totalReadThisMonth}
           monthlyGoal={30}
           yearProgress={yearProgress}
-          isLoading={loading || isProgressLoading}
+          isLoading={isProgressLoading}
         />
         
         <div className="space-y-6">
@@ -153,20 +237,26 @@ const Index = () => {
           </div>
           
           <div className="space-y-4">
-            {readings.map((reading) => (
+            {scriptures.map((scripture) => (
               <ScriptureCard
-                key={reading.id}
-                reading={reading}
-                isRead={isRead(reading.id)}
-                onMarkAsRead={markAsRead}
-                isLoading={loading || isProgressLoading}
+                key={scripture.id}
+                reading={{
+                  id: scripture.id,
+                  book: scripture.book,
+                  chapter: scripture.chapter,
+                  verses: scripture.verses,
+                  text: scripture.text,
+                  theme: scripture.theme
+                }}
+                isRead={isRead(scripture.id)}
+                onMarkAsRead={handleMarkAsRead}
+                isLoading={isLoading || isProgressLoading}
               />
             ))}
           </div>
         </div>
         
         <PrayerSection />
-        
         <PrayerExamples />
       </main>
     </div>
