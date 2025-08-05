@@ -14,6 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      books: {
+        Row: {
+          abbreviation: string | null
+          id: number
+          name_en: string | null
+          name_th: string
+          testament: string
+        }
+        Insert: {
+          abbreviation?: string | null
+          id?: number
+          name_en?: string | null
+          name_th: string
+          testament: string
+        }
+        Update: {
+          abbreviation?: string | null
+          id?: number
+          name_en?: string | null
+          name_th?: string
+          testament?: string
+        }
+        Relationships: []
+      }
+      chapters: {
+        Row: {
+          book_id: number | null
+          chapter_number: number
+          id: number
+        }
+        Insert: {
+          book_id?: number | null
+          chapter_number: number
+          id?: number
+        }
+        Update: {
+          book_id?: number | null
+          chapter_number?: number
+          id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chapters_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_readings: {
         Row: {
           created_at: string
@@ -38,8 +88,141 @@ export type Database = {
         }
         Relationships: []
       }
+      group_memberships: {
+        Row: {
+          group_id: string
+          id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_memberships_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "user_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prayer_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          prayer_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          prayer_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          prayer_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prayer_comments_prayer_id_fkey"
+            columns: ["prayer_id"]
+            isOneToOne: false
+            referencedRelation: "prayer_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prayer_likes: {
+        Row: {
+          created_at: string
+          id: string
+          prayer_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          prayer_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          prayer_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prayer_likes_prayer_id_fkey"
+            columns: ["prayer_id"]
+            isOneToOne: false
+            referencedRelation: "prayer_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prayer_requests: {
+        Row: {
+          answered_at: string | null
+          content: string
+          created_at: string
+          display_name: string | null
+          id: string
+          is_answered: boolean
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answered_at?: string | null
+          content: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          is_answered?: boolean
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answered_at?: string | null
+          content?: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          is_answered?: boolean
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
+          address: string | null
           avatar_url: string | null
           created_at: string
           display_name: string | null
@@ -49,6 +232,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          address?: string | null
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
@@ -58,6 +242,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          address?: string | null
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
@@ -66,14 +251,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_id_fkey"
-            columns: ["id"]
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       reading_progress: {
         Row: {
@@ -82,7 +260,6 @@ export type Database = {
           id: string
           is_completed: boolean
           reading_id: string
-          updated_at: string
           user_id: string
         }
         Insert: {
@@ -91,7 +268,6 @@ export type Database = {
           id?: string
           is_completed?: boolean
           reading_id: string
-          updated_at?: string
           user_id: string
         }
         Update: {
@@ -100,145 +276,70 @@ export type Database = {
           id?: string
           is_completed?: boolean
           reading_id?: string
-          updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "reading_progress_reading_id_fkey"
-            columns: ["reading_id"]
-            referencedRelation: "daily_readings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reading_progress_user_id_fkey"
-            columns: ["user_id"]
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
-      prayer_notes: {
+      user_groups: {
         Row: {
-          id: string
-          user_id: string
-          title: string
-          content: string
-          date: string
-          is_private: boolean
-          care_group_id: string | null
           created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          title: string
-          content: string
-          date: string
-          is_private?: boolean
-          care_group_id?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          title?: string
-          content?: string
-          date?: string
-          is_private?: boolean
-          care_group_id?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "prayer_notes_user_id_fkey"
-            columns: ["user_id"]
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "prayer_notes_care_group_id_fkey"
-            columns: ["care_group_id"]
-            referencedRelation: "care_groups"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      care_groups: {
-        Row: {
-          id: string
-          name: string
+          created_by: string
           description: string | null
-          image_url: string | null
-          created_by: string
-          created_at: string
+          id: string
+          is_public: boolean
+          name: string
           updated_at: string
         }
         Insert: {
-          id?: string
-          name: string
-          description?: string | null
-          image_url?: string | null
-          created_by: string
           created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          name: string
           updated_at?: string
         }
         Update: {
-          id?: string
-          name?: string
-          description?: string | null
-          image_url?: string | null
-          created_by?: string
           created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          name?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "care_groups_created_by_fkey"
-            columns: ["created_by"]
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          }
-        ]
+        Relationships: []
       }
-      user_care_groups: {
+      verses: {
         Row: {
-          id: string
-          user_id: string
-          care_group_id: string
-          role: string
-          created_at: string
+          chapter_id: number | null
+          id: number
+          text_en: string | null
+          text_th: string
+          verse_number: number
         }
         Insert: {
-          id?: string
-          user_id: string
-          care_group_id: string
-          role?: string
-          created_at?: string
+          chapter_id?: number | null
+          id?: number
+          text_en?: string | null
+          text_th: string
+          verse_number: number
         }
         Update: {
-          id?: string
-          user_id?: string
-          care_group_id?: string
-          role?: string
-          created_at?: string
+          chapter_id?: number | null
+          id?: number
+          text_en?: string | null
+          text_th?: string
+          verse_number?: number
         }
         Relationships: [
           {
-            foreignKeyName: "user_care_groups_user_id_fkey"
-            columns: ["user_id"]
-            referencedRelation: "profiles"
+            foreignKeyName: "verses_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "user_care_groups_care_group_id_fkey"
-            columns: ["care_group_id"]
-            referencedRelation: "care_groups"
-            referencedColumns: ["id"]
-          }
         ]
       }
     }

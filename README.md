@@ -1,93 +1,73 @@
-# NexusNew
+# Welcome to your Lovable project
 
-แอปพลิเคชันอ่านพระคัมภีร์ประจำปีสำหรับ NexusBangkok Church
+## Project info
 
-## 🚀 ฟีเจอร์หลัก
+**URL**: https://lovable.dev/projects/1b0ab179-4687-4289-adb4-c8433ff9f697
 
-- **ข้อพระคัมภีร์ประจำปี** - อ่านพระคัมภีร์ตามวันที่กำหนด
-- **ข้อพระคัมภีร์แบบสุ่ม** - ค้นพบข้อพระคัมภีร์ใหม่ที่ให้กำลังใจ
-- **YouTube Integration** - ติดตามคำเทศนาล่าสุดจาก NexusBangkok Church
-- **ลงทะเบียนเรียนคลาสพระคัมภีร์** - ลงทะเบียนเรียนคลาสที่ NexusBangkok Church
-- **Dashboard** - ติดตามความคืบหน้าการอ่านพระคัมภีร์
-- **ระบบ Authentication** - เข้าสู่ระบบด้วย Google หรืออีเมล
+## How can I edit this code?
 
-## 🛠️ เทคโนโลยีที่ใช้
+There are several ways of editing your application.
 
-- **Frontend**: React 18 + TypeScript
-- **UI Framework**: Tailwind CSS + shadcn/ui
-- **Build Tool**: Vite
-- **Database**: Supabase
-- **Authentication**: Supabase Auth
-- **Routing**: React Router
+**Use Lovable**
 
-## 📦 การติดตั้ง
+Simply visit the [Lovable Project](https://lovable.dev/projects/1b0ab179-4687-4289-adb4-c8433ff9f697) and start prompting.
 
-1. **Clone repository**
-   ```bash
-   git clone https://github.com/candelza/NexusNew.git
-   cd NexusNew
-   ```
+Changes made via Lovable will be committed automatically to this repo.
 
-2. **ติดตั้ง dependencies**
-   ```bash
-   npm install
-   ```
+**Use your preferred IDE**
 
-3. **ตั้งค่า Environment Variables**
-   สร้างไฟล์ `.env.local` และเพิ่ม:
-   ```env
-   VITE_SUPABASE_URL=your_supabase_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ```
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-4. **รัน Development Server**
-   ```bash
-   npm run dev
-   ```
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-5. **เปิดเบราว์เซอร์**
-   ไปที่ [http://localhost:8080](http://localhost:8080)
+Follow these steps:
 
-## 🏗️ การ Build
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
 
-```bash
-npm run build
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
+
+# Step 3: Install the necessary dependencies.
+npm i
+
+# Step 4: Start the development server with auto-reloading and an instant preview.
+npm run dev
 ```
 
-## 📱 หน้าต่างๆ
+**Edit a file directly in GitHub**
 
-- **หน้าหลัก** (`/`) - ข้อพระคัมภีร์ประจำปีและ YouTube
-- **ข้อพระคัมภีร์แบบสุ่ม** (`/random`) - สุ่มข้อพระคัมภีร์ใหม่
-- **ลงทะเบียนเรียนคลาส** (`/bible-class`) - ลงทะเบียนเรียนคลาสพระคัมภีร์
-- **Dashboard** (`/dashboard`) - สถิติการอ่านพระคัมภีร์
-- **Authentication** (`/auth`) - เข้าสู่ระบบ/สมัครสมาชิก
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-## 🎯 ฟีเจอร์ที่กำลังพัฒนา
+**Use GitHub Codespaces**
 
-- [ ] การแจ้งเตือนข้อพระคัมภีร์ประจำปี
-- [ ] การแชร์ข้อพระคัมภีร์ในโซเชียลมีเดีย
-- [ ] ระบบกลุ่มอ่านพระคัมภีร์
-- [ ] การบันทึกโน้ตส่วนตัว
-- [ ] การค้นหาข้อพระคัมภีร์
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-## 🤝 การมีส่วนร่วม
+## What technologies are used for this project?
 
-1. Fork โปรเจกต์
-2. สร้าง Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit การเปลี่ยนแปลง (`git commit -m 'Add some AmazingFeature'`)
-4. Push ไปยัง Branch (`git push origin feature/AmazingFeature`)
-5. เปิด Pull Request
+This project is built with:
 
-## 📞 ติดต่อ
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
 
-- **Website**: [NexusBangkok Church](https://www.facebook.com/NexusBangkok)
-- **YouTube**: [NexusBangkok Church](https://www.youtube.com/@nexusfellowship)
-- **Email**: info@nexusbangkok.org
+## How can I deploy this project?
 
-## 📄 License
+Simply open [Lovable](https://lovable.dev/projects/1b0ab179-4687-4289-adb4-c8433ff9f697) and click on Share -> Publish.
 
-โปรเจกต์นี้อยู่ภายใต้ MIT License - ดูรายละเอียดในไฟล์ [LICENSE](LICENSE)
+## Can I connect a custom domain to my Lovable project?
 
-## 🙏 ขอบคุณ
+Yes, you can!
 
-ขอบคุณ NexusBangkok Church สำหรับการสนับสนุนและคำแนะนำในการพัฒนาแอปพลิเคชันนี้
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)

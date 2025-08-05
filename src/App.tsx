@@ -4,21 +4,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import { LanguageProvider } from "./contexts/LanguageContext";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
-import RandomVerses from "./pages/RandomVerses";
-import BibleClassRegistration from "./pages/BibleClassRegistration";
-import ManageCareGroup from "./pages/ManageCareGroup";
 import Profile from "./pages/Profile";
-import NewPrayer from "./pages/NewPrayer";
 import NotFound from "./pages/NotFound";
-import Members from "./pages/Members";
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <LanguageProvider>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -28,19 +21,13 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/random" element={<RandomVerses />} />
-          <Route path="/bible-class" element={<BibleClassRegistration />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/prayer/new" element={<NewPrayer />} />
-          <Route path="/care-group/:id/manage" element={<ManageCareGroup />} />
-          <Route path="/members" element={<Members />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-  </LanguageProvider>
 );
 
 export default App;

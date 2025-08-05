@@ -1,33 +1,34 @@
-import { Calendar as CalendarIcon, Church, User, LogIn } from "lucide-react";
+import { Calendar, Church, User, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
-import { LanguageToggle } from "@/components/LanguageToggle";
-import { useLanguage } from "@/contexts/LanguageContext";
 
 interface HeaderProps {
   currentDate: Date;
   onDateChange: (date: Date) => void;
-  children?: React.ReactNode;
 }
 
-export const Header = ({ currentDate, onDateChange, children }: HeaderProps) => {
+export const Header = ({ currentDate, onDateChange }: HeaderProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const goToPreviousDay = () => {
+    const previousDay = new Date(currentDate);
+    previousDay.setDate(currentDate.getDate() - 1);
+    onDateChange(previousDay);
+  };
 
+  const goToNextDay = () => {
+    const nextDay = new Date(currentDate);
+    nextDay.setDate(currentDate.getDate() + 1);
+    onDateChange(nextDay);
+  };
 
   const goToToday = () => {
     onDateChange(new Date());
   };
 
-  const { lang } = useLanguage();
-
   const formatDate = (date: Date) => {
-    const locale = lang === 'en' ? 'en-US' : 'th-TH';
-    return date.toLocaleDateString(locale, {
+    return date.toLocaleDateString('th-TH', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -43,13 +44,12 @@ export const Header = ({ currentDate, onDateChange, children }: HeaderProps) => 
             <div className="p-2 bg-accent rounded-lg">
               <Church className="w-6 h-6 text-accent-foreground" />
             </div>
-            <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold text-foreground">พระคัมภีร์ประจำปี</h1>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">พระคัมภีร์ประจำวัน</h1>
               <p className="text-sm text-muted-foreground">Nexus Church Bangkok</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <LanguageToggle />
             <Button variant="outline" onClick={goToToday} className="gap-2">
               <Calendar className="w-4 h-4" />
               วันนี้
@@ -78,30 +78,16 @@ export const Header = ({ currentDate, onDateChange, children }: HeaderProps) => 
           </div>
         </div>
         
-        <div className="flex items-center justify-center gap-4">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={"outline"}
-                className={cn(
-                  "w-[280px] justify-start text-left font-normal",
-                  !currentDate && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {formatDate(currentDate)}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={currentDate}
-                onSelect={(date) => onDateChange(date || new Date())}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-           {children}
+        <div className="flex items-center justify-between">
+          <Button variant="ghost" onClick={goToPreviousDay}>
+            ← วันก่อน
+          </Button>
+          <h2 className="text-lg font-semibold text-foreground">
+            {formatDate(currentDate)}
+          </h2>
+          <Button variant="ghost" onClick={goToNextDay}>
+            วันถัดไป →
+          </Button>
         </div>
       </div>
     </header>
