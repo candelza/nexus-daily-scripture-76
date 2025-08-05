@@ -4,9 +4,6 @@
   
   # Directory to publish (Vite builds to 'dist' by default)
   publish = "dist"
-  
-  # Node.js version
-  environment = { NODE_VERSION = "18" }
 
 # SPA routing - redirect all routes to index.html
 [[redirects]]
@@ -31,5 +28,6 @@
 # Environment variables for ReadBible project
 # Set these in Netlify dashboard under Site settings > Environment variables
 [build.environment]
+  NODE_VERSION = "18"
   VITE_SUPABASE_URL = "https://sijdfgnypaplxihifwgi.supabase.co"
   VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpamRmZ255cGFwbHhpaGlmd2dpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMzYwODAsImV4cCI6MjA2OTgxMjA4MH0.RBEmlyAtd0qCNABXMwbgeeSASnEx7S2SsnHduYDtnUg"
