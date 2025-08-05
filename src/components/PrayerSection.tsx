@@ -54,14 +54,31 @@ const PrayerSection = () => {
         setDisplayName(profileData.display_name || '');
       }
 
-      // Load current group from localStorage (temporary until group_memberships table is properly set up)
-      const savedGroup = localStorage.getItem(`user_group_${user?.id}`);
-      if (savedGroup) {
-        const groupNames = ['เยาวชน', 'ผู้ใหญ่', 'ผู้สูงอายุ', 'ครอบครัว'];
-        const groupName = groupNames[parseInt(savedGroup) - 1] || 'ยังไม่ได้เลือกกลุ่ม';
-        setCurrentGroup(groupName);
+          // Load user's group membership with group details
+      const { data: groupData, error: groupError } = await supabase
+        .from('group_memberships')
+        .select(`
+          id,
+          user_groups!inner(
+            id,
+            name,
+            description
+          )
+        `)
+        .eq('user_id', user?.id)
+        .single();
+
+      if (groupError && groupError.code !== 'PGRST116') {
+        console.error('Error loading group:', groupError);
+        setCurrentGroup('ยังไม่ได้เลือกกลุ่ม');
+      } else if (groupData?.user_groups?.name) {
+        setCurrentGroup(groupData.user_groups.name);
+        // Store the group name in local storage for quick access
+        localStorage.setItem(`user_group_${user?.id}`, groupData.user_groups.name);
       } else {
         setCurrentGroup('ยังไม่ได้เลือกกลุ่ม');
+        // Clear any previously stored group
+        localStorage.removeItem(`user_group_${user?.id}`);
       }
     } catch (error) {
       console.error('Error loading user data:', error);
@@ -69,18 +86,19 @@ const PrayerSection = () => {
   };
 
   const getGroupColor = (groupName: string) => {
-    switch (groupName) {
-      case 'เยาวชน':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-      case 'ผู้ใหญ่':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-      case 'ผู้สูงอายุ':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
-      case 'ครอบครัว':
-        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
-    }
+    // Normalize group name by removing 'กลุ่ม' prefix for consistency
+    const normalizedGroupName = groupName.replace(/^กลุ่ม/, '');
+    
+    // Create a consistent color based on the group name
+    const groupColors: {[key: string]: string} = {
+      'เยาวชน': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+      'ผู้ใหญ่': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+      'ผู้สูงอายุ': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
+      'ครอบครัว': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300'
+    };
+    
+    // Return the matching color or a default one
+    return groupColors[normalizedGroupName] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -177,9 +195,13 @@ const PrayerSection = () => {
             </div>
           </div>
           
-          {currentGroup === 'ยังไม่ได้เลือกกลุ่ม' && (
+          {!currentGroup || currentGroup === 'ยังไม่ได้เลือกกลุ่ม' ? (
             <div className="text-sm text-muted-foreground bg-background rounded p-2 border">
               💡 <strong>แนะนำ:</strong> ไปที่ <Link to="/profile" className="text-primary hover:underline">ตั้งค่าโปรไฟล์</Link> เพื่อเลือกกลุ่มของคุณ
+            </div>
+          ) : (
+            <div className="text-sm text-muted-foreground">
+              กลุ่ม: <span className="font-medium text-foreground">{currentGroup}</span>
             </div>
           )}
         </div>
