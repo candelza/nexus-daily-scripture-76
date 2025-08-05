@@ -1,24 +1,132 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>พระคัมภีร์ประจำวัน - Nexus Church Bangkok</title>
-    <meta name="description" content="แอพอ่านพระคัมภีร์ประจำวันสำหรับ Nexus Church Bangkok" />
-    <meta name="author" content="Nexus Church Bangkok" />
+    <title>Faith Nexus Hub - ศูนย์รวมความเชื่อและการอ่านพระคัมภีร์</title>
+    <meta name="description" content="แพลตฟอร์มครบวงจรสำหรับการอ่านพระคัมภีร์ประจำวัน การอธิษฐาน การจัดการกลุ่ม และการติดตามความคืบหน้าในการอ่านพระคัมภีร์ 1 ปี พร้อมระบบรางวัลและการแชร์สังคม" />
+    <meta name="keywords" content="พระคัมภีร์, การอธิษฐาน, ศาสนาคริสต์, กลุ่มศรัทธา, การอ่านพระคัมภีร์, Nexus Church Bangkok, Faith Community" />
+    <meta name="author" content="Faith Nexus Hub Team" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#2563eb" />
 
-    <meta property="og:title" content="พระคัมภีร์ประจำวัน - Nexus Church Bangkok" />
-    <meta property="og:description" content="แอพอ่านพระคัมภีร์ประจำวันสำหรับ Nexus Church Bangkok" />
+    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta property="og:url" content="https://faith-nexus-hub.vercel.app/" />
+    <meta property="og:title" content="Faith Nexus Hub - ศูนย์รวมความเชื่อและการอ่านพระคัมภีร์" />
+    <meta property="og:description" content="แพลตฟอร์มครบวงจรสำหรับการอ่านพระคัมภีร์ประจำวัน การอธิษฐาน การจัดการกลุ่ม และการติดตามความคืบหน้าในการอ่านพระคัมภีร์ 1 ปี" />
+    <meta property="og:image" content="https://faith-nexus-hub.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="th_TH" />
+    <meta property="og:site_name" content="Faith Nexus Hub" />
 
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta name="twitter:url" content="https://faith-nexus-hub.vercel.app/" />
+    <meta name="twitter:title" content="Faith Nexus Hub - ศูนย์รวมความเชื่อและการอ่านพระคัมภีร์" />
+    <meta name="twitter:description" content="แพลตฟอร์มครบวงจรสำหรับการอ่านพระคัมภีร์ประจำวัน การอธิษฐาน และการติดตามความคืบหน้า" />
+    <meta name="twitter:image" content="https://faith-nexus-hub.vercel.app/og-image.png" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Faith Nexus Hub - Complete Platform for Christian Community -->
+      
+      <!-- 🔐 Admin Management System -->
+      <!-- Advanced permission management with role-based access control -->
+      <!-- Features: User roles (admin/moderator), invitation system, user management -->
+      <div id="admin-permissions" data-feature="admin-management"></div>
+
+      <!-- 👤 Enhanced User Profile System -->
+      <!-- Complete profile management with group integration -->
+      <!-- Features: Name/email editing, group membership, custom groups, avatar upload -->
+      <div id="user-profile" data-feature="profile-system"></div>
+
+      <!-- 📅 Interactive Scripture Calendar -->
+      <!-- Daily scripture selection with 3 random options -->
+      <!-- Features: Date navigation, scripture selection, daily tracking -->
+      <div id="scripture-calendar" data-feature="scripture-calendar"></div>
+
+      <!-- 🙏 Social Prayer Community -->
+      <!-- Enhanced prayer requests with social features -->
+      <!-- Features: Like/comment system, user profiles, Facebook/Line sharing -->
+      <div id="prayer-requests" data-feature="social-prayer"></div>
+
+      <!-- 📖 Yearly Bible Reading Plan -->
+      <!-- Systematic 365-day Bible reading program -->
+      <!-- Features: Daily assignments, progress tracking, chapter explanations -->
+      <div id="yearly-reading-plan" data-feature="yearly-reading"></div>
+
+      <!-- 📊 Comprehensive Dashboard -->
+      <!-- Progress tracking and achievement system -->
+      <!-- Features: Reading statistics, trophy system, social sharing, yearly summary -->
+      <div id="dashboard" data-feature="dashboard-analytics"></div>
+
+      <!-- 🏆 Achievement & Trophy System -->
+      <!-- Gamification and social recognition -->
+      <!-- Features: Completion trophies, social media sharing, milestone celebrations -->
+      <div id="achievements" data-feature="trophy-system"></div>
+
+      <!-- 👥 Group Management System -->
+      <!-- Community building and group interactions -->
+      <!-- Features: Public/private groups, membership management, group activities -->
+      <div id="group-management" data-feature="group-system"></div>
+
+      <!-- 📈 Progress Analytics -->
+      <!-- Detailed tracking and insights -->
+      <!-- Features: Reading streaks, completion rates, yearly progress, statistics -->
+      <div id="progress-analytics" data-feature="progress-tracking"></div>
+
+      <!-- Database Integration Points -->
+      <!-- Supabase-powered features with real-time capabilities -->
+      <div id="database-features" style="display: none;">
+        <!-- Tables: profiles, admin_roles, admin_invites, user_groups, group_memberships -->
+        <!-- Tables: daily_scripture_selections, reading_progress, prayer_topics -->
+        <!-- Features: Row Level Security, Real-time subscriptions, Storage for avatars -->
+      </div>
+    </div>
+
+    <!-- Main Application Entry Point -->
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Performance and Analytics -->
+    <script>
+      // Performance monitoring
+      window.addEventListener('load', function() {
+        console.log('Faith Nexus Hub loaded successfully');
+        
+        // Track feature usage (optional)
+        if (typeof gtag !== 'undefined') {
+          gtag('event', 'app_loaded', {
+            'app_name': 'Faith Nexus Hub',
+            'app_version': '2.0.0'
+          });
+        }
+      });
+
+      // Service Worker registration for PWA capabilities
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js')
+            .then(function(registration) {
+              console.log('ServiceWorker registration successful');
+            })
+            .catch(function(err) {
+              console.log('ServiceWorker registration failed');
+            });
+        });
+      }
+    </script>
   </body>
 </html>
