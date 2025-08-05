@@ -1,6 +1,6 @@
 {
     "mcpServers": {
-      "supabase": {
+      "readbible": {
         "command": "npx",
         "args": [
           "-y",
@@ -12,7 +12,7 @@
           "SUPABASE_ACCESS_TOKEN": "sbp_9ce22a895a3fd657cdcdb372a0d111c9b8c807b5"
         }
       },
-      "supabase-local": {
+      "readbible-local": {
         "command": "npx",
         "args": [
           "-y",
