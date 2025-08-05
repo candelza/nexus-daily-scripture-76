@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,22 +23,8 @@ const queryClient = new QueryClient({
   },
 });
 
-// Lazy load the main app routes
-const AppRoutes = React.lazy(() => 
-  import('./AppRoutes').catch(error => {
-    console.error('Failed to load AppRoutes:', error);
-    // Return a fallback component
-    return {
-      default: () => (
-        <div style={{ padding: '20px', textAlign: 'center' }}>
-          <h2>⚠️ Loading Error</h2>
-          <p>Failed to load application routes. Using simple mode.</p>
-          <button onClick={() => window.location.reload()}>Reload</button>
-        </div>
-      )
-    };
-  })
-);
+// Import AppRoutes directly to avoid lazy loading issues
+import AppRoutes from './AppRoutes';
 
 const ProgressiveApp: React.FC = () => {
   const [appState, setAppState] = useState<ProgressiveAppState>({
@@ -193,19 +179,7 @@ const ProgressiveApp: React.FC = () => {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <BrowserRouter>
-          <Suspense fallback={
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '100vh',
-              fontSize: '18px'
-            }}>
-              Loading application...
-            </div>
-          }>
-            <AppRoutes />
-          </Suspense>
+          <AppRoutes />
           <Toaster />
           <Sonner />
         </BrowserRouter>

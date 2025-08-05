@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client'
-import ProgressiveApp from './App-Progressive.tsx'
+import App from './App.tsx'
 import ErrorBoundary from './components/ErrorBoundary.tsx'
 import './index.css'
 
@@ -31,7 +31,7 @@ try {
   
   root.render(
     <ErrorBoundary>
-      <ProgressiveApp />
+      <App />
     </ErrorBoundary>
   );
   
