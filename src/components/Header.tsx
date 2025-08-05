@@ -1,4 +1,5 @@
-import { Calendar, Church, User, LogIn } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { Calendar, Church, User, LogIn, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -9,8 +10,15 @@ interface HeaderProps {
 }
 
 export const Header = ({ currentDate, onDateChange }: HeaderProps) => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
+  
+  // Prevent hydration mismatch
+  const [isClient, setIsClient] = useState(false);
+  
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
   const goToPreviousDay = () => {
     const previousDay = new Date(currentDate);
     previousDay.setDate(currentDate.getDate() - 1);
@@ -54,7 +62,11 @@ export const Header = ({ currentDate, onDateChange }: HeaderProps) => {
               <Calendar className="w-4 h-4" />
               วันนี้
             </Button>
-            {user ? (
+            {!isClient || loading ? (
+              <Button variant="outline" size="sm" disabled>
+                <Loader2 className="h-4 w-4 animate-spin" />
+              </Button>
+            ) : user ? (
               <Button 
                 variant="outline" 
                 size="sm" 
